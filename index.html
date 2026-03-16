@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      padding:30px;
+      font-family:Arial, sans-serif;
+      background:
+        linear-gradient(rgba(61,29,11,0.18),rgba(61,29,11,0.18)),
+        url('https://lirp.cdn-website.com/c174546f/dms3rep/multi/opt/logo-1920w.png') center / 420px repeat,
+        #d89024;
+    }
+
+    .container{
+      max-width:900px;
+      margin:auto;
+      padding:28px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.85);
+      box-shadow:0 8px 30px rgba(0,0,0,.3);
+    }
+
+    h1{
+      margin-top:0;
+      font-size:34px;
+    }
+
+    .intro{
+      margin-bottom:20px;
+      font-size:16px;
+    }
+
+    .section{
+      margin-top:25px;
+      font-weight:bold;
+      font-size:18px;
+    }
+
+    .field{
+      margin-top:12px;
+      padding:14px;
+      border-radius:12px;
+      background:rgba(255,255,255,.75);
+      border:1px solid rgba(0,0,0,.1);
+    }
+
+    select,button{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:15px;
+    }
+
+    .radio-group,.checkbox-group{
+      display:grid;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px;
+      background:white;
+      border-radius:8px;
+    }
+
+    button{
+      background:#8b1e14;
+      color:white;
+      border:none;
+      font-weight:bold;
+      margin-top:15px;
+      cursor:pointer;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    #status{
+      margin-top:15px;
+      font-weight:bold;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Ramona’s Meal Order Form</h1>
+<p class="intro">Tell Sgt Dear your food order below.</p>
+
+<form id="mealForm">
+
+<div class="field">
+<label>Member Name</label>
+<select id="memberName" required>
+<option>Loading names...</option>
+</select>
+</div>
+
+<div class="section">Meal Selection</div>
+
+<div class="field">
+<div class="radio-group">
+
+<label class="item">
+<input type="radio" name="mealType" value="Burrito">
+Burrito
+</label>
+
+<label class="item">
+<input type="radio" name="mealType" value="3 Tacos">
+3 Tacos
+</label>
+
+</div>
+</div>
+
+
+<div id="burritoSection" class="hidden">
+
+<div class="field">
+<label>Burrito Choice</label>
+
+<div class="radio-group">
+
+<label class="item"><input type="radio" name="burritoChoice" value="Beef & Red Chile Burrito">Beef & Red Chile Burrito</label>
+<label class="item"><input type="radio" name="burritoChoice" value="Beef & Green Chile Burrito">Beef & Green Chile Burrito</label>
+<label class="item"><input type="radio" name="burritoChoice" value="Chicken & Green Chile Burrito">Chicken & Green Chile Burrito</label>
+<label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno Burrito">Chile Relleno Burrito</label>
+
+</div>
+</div>
+
+<div class="field">
+<label>Add‑ons</label>
+
+<div class="checkbox-group">
+
+<label class="item"><input type="checkbox" id="addRice">Rice</label>
+<label class="item"><input type="checkbox" id="addCheese">Cheese</label>
+<label class="item"><input type="checkbox" id="addGreenOnion">Green Onion</label>
+<label class="item"><input type="checkbox" id="addLettuce">Lettuce</label>
+
+</div>
+</div>
+
+
+<div class="field">
+
+<label class="item">
+<input type="checkbox" id="extraTaco">
+Add up to 1 taco
+</label>
+
+</div>
+
+<div id="extraTacoSection" class="hidden">
+
+<div class="field">
+<label>Extra Taco Type</label>
+
+<div class="radio-group">
+
+<label class="item"><input type="radio" name="extraTacoType" value="Picadillo Taco">Picadillo Taco</label>
+<label class="item"><input type="radio" name="extraTacoType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+
+</div>
+</div>
+
+<div class="field">
+<label class="item">
+<input type="checkbox" id="extraTacoHotSauce">
+Add Hot Sauce
+</label>
+</div>
+
+</div>
+
+</div>
+
+
+<div id="tacoSection" class="hidden">
+
+<div class="field">
+<label>3 Taco Order Type</label>
+
+<div class="radio-group">
+
+<label class="item"><input type="radio" name="tacoPlateType" value="Picadillo Taco">Picadillo Taco</label>
+<label class="item"><input type="radio" name="tacoPlateType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+
+</div>
+
+</div>
+
+<div class="field">
+<label class="item">
+<input type="checkbox" id="tacoPlateHotSauce">
+Add Hot Sauce
+</label>
+</div>
+
+</div>
+
+
+<button type="submit">Submit Order</button>
+
+</form>
+
+<div id="status"></div>
+
+</div>
+
+
+<script>
+
+function loadNames(){
+
+google.script.run
+.withSuccessHandler(function(names){
+
+const select=document.getElementById("memberName");
+
+select.innerHTML='<option value="">Select Name</option>';
+
+names.forEach(function(n){
+
+let opt=document.createElement("option");
+opt.value=n;
+opt.textContent=n;
+select.appendChild(opt);
+
+});
+
+})
+.getNames();
+
+}
+
+
+function updateMeal(){
+
+const type=document.querySelector('input[name="mealType"]:checked')?.value;
+
+document.getElementById("burritoSection").classList.add("hidden");
+document.getElementById("tacoSection").classList.add("hidden");
+
+if(type==="Burrito"){
+document.getElementById("burritoSection").classList.remove("hidden");
+}
+
+if(type==="3 Tacos"){
+document.getElementById("tacoSection").classList.remove("hidden");
+}
+
+}
+
+
+function updateExtra(){
+
+const checked=document.getElementById("extraTaco").checked;
+
+if(checked){
+document.getElementById("extraTacoSection").classList.remove("hidden");
+}else{
+document.getElementById("extraTacoSection").classList.add("hidden");
+}
+
+}
+
+
+document.querySelectorAll('input[name="mealType"]').forEach(el=>{
+el.addEventListener("change",updateMeal);
+});
+
+document.getElementById("extraTaco").addEventListener("change",updateExtra);
+
+
+document.getElementById("mealForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const formData={
+
+memberName:document.getElementById("memberName").value,
+
+mealType:document.querySelector('input[name="mealType"]:checked')?.value||"",
+
+burritoChoice:document.querySelector('input[name="burritoChoice"]:checked')?.value||"",
+
+addRice:document.getElementById("addRice").checked,
+addCheese:document.getElementById("addCheese").checked,
+addGreenOnion:document.getElementById("addGreenOnion").checked,
+addLettuce:document.getElementById("addLettuce").checked,
+
+extraTaco:document.getElementById("extraTaco").checked,
+extraTacoType:document.querySelector('input[name="extraTacoType"]:checked')?.value||"",
+extraTacoHotSauce:document.getElementById("extraTacoHotSauce").checked,
+
+tacoPlateType:document.querySelector('input[name="tacoPlateType"]:checked')?.value||"",
+tacoPlateHotSauce:document.getElementById("tacoPlateHotSauce").checked
+
+};
+
+google.script.run
+.withSuccessHandler(function(){
+
+document.getElementById("status").innerHTML="Order submitted successfully.";
+document.getElementById("mealForm").reset();
+
+})
+.submitForm(formData);
+
+});
+
+
+loadNames();
+
+</script>
+
+</body>
+</html>
