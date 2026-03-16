@@ -1,331 +1,381 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ramona’s Meal Order Form</title>
 
   <style>
-    body{
-      margin:0;
-      padding:30px;
-      font-family:Arial, sans-serif;
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: Arial, sans-serif;
       background:
-        linear-gradient(rgba(61,29,11,0.18),rgba(61,29,11,0.18)),
+        linear-gradient(rgba(61, 29, 11, 0.18), rgba(61, 29, 11, 0.18)),
         url('https://lirp.cdn-website.com/c174546f/dms3rep/multi/opt/logo-1920w.png') center / 420px repeat,
         #d89024;
     }
 
-    .container{
-      max-width:900px;
-      margin:auto;
-      padding:28px;
-      border-radius:20px;
-      background:rgba(255,255,255,0.85);
-      box-shadow:0 8px 30px rgba(0,0,0,.3);
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 28px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 8px 30px rgba(0,0,0,.3);
     }
 
-    h1{
-      margin-top:0;
-      font-size:34px;
+    h1 {
+      margin-top: 0;
+      font-size: 34px;
     }
 
-    .intro{
-      margin-bottom:20px;
-      font-size:16px;
+    .intro {
+      margin-bottom: 20px;
+      font-size: 16px;
     }
 
-    .section{
-      margin-top:25px;
-      font-weight:bold;
-      font-size:18px;
+    .section {
+      margin-top: 25px;
+      font-weight: bold;
+      font-size: 18px;
     }
 
-    .field{
-      margin-top:12px;
-      padding:14px;
-      border-radius:12px;
-      background:rgba(255,255,255,.75);
-      border:1px solid rgba(0,0,0,.1);
+    .field {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(0,0,0,.1);
     }
 
-    label{
-      display:block;
-      margin-bottom:8px;
-      font-weight:bold;
+    label.main-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
     }
 
-    select,button{
-      width:100%;
-      padding:12px;
-      border-radius:10px;
-      border:1px solid #ccc;
-      font-size:15px;
-      box-sizing:border-box;
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      box-sizing: border-box;
     }
 
-    .radio-group,.checkbox-group{
-      display:grid;
-      gap:8px;
-      margin-top:8px;
+    .radio-group,
+    .checkbox-group {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
     }
 
-    .item{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:8px;
-      background:white;
-      border-radius:8px;
-      font-weight:normal;
-      margin-bottom:0;
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      font-weight: normal;
+      margin-bottom: 0;
+      cursor: pointer;
     }
 
-    .item input{
-      width:auto;
-      margin:0;
+    .item input {
+      width: auto;
+      margin: 0;
     }
 
-    button{
-      background:#8b1e14;
-      color:white;
-      border:none;
-      font-weight:bold;
-      margin-top:15px;
-      cursor:pointer;
+    button {
+      background: #8b1e14;
+      color: white;
+      border: none;
+      font-weight: bold;
+      margin-top: 15px;
+      cursor: pointer;
     }
 
-    .hidden{
-      display:none;
+    button:hover {
+      background: #74180f;
     }
 
-    #status{
-      margin-top:15px;
-      font-weight:bold;
+    .hidden {
+      display: none;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 20px;
     }
   </style>
 </head>
-
 <body>
 
-<div class="container">
+  <div class="container">
+    <h1>Ramona’s Meal Order Form</h1>
+    <p class="intro">Tell Sgt Dear your food order below.</p>
 
-  <h1>Ramona’s Meal Order Form</h1>
-  <p class="intro">Tell Sgt Dear your food order below.</p>
-
-  <form id="mealForm">
-
-    <div class="field">
-      <label for="memberName">Member Name</label>
-      <select id="memberName" required>
-        <option value="">Loading names...</option>
-      </select>
-    </div>
-
-    <div class="section">Meal Selection</div>
-
-    <div class="field">
-      <div class="radio-group">
-        <label class="item">
-          <input type="radio" name="mealType" value="Burrito">
-          Burrito
-        </label>
-
-        <label class="item">
-          <input type="radio" name="mealType" value="3 Tacos">
-          3 Tacos
-        </label>
+    <form id="mealForm">
+      <div class="field">
+        <label for="memberName" class="main-label">Member Name</label>
+        <select id="memberName" required>
+          <option value="">Loading names...</option>
+        </select>
       </div>
-    </div>
 
-    <div id="burritoSection" class="hidden">
+      <div class="section">Meal Selection</div>
 
       <div class="field">
-        <label>Burrito Choice</label>
         <div class="radio-group">
-          <label class="item"><input type="radio" name="burritoChoice" value="Beef & Red Chile Burrito">Beef & Red Chile Burrito</label>
-          <label class="item"><input type="radio" name="burritoChoice" value="Beef & Green Chile Burrito">Beef & Green Chile Burrito</label>
-          <label class="item"><input type="radio" name="burritoChoice" value="Chicken & Green Chile Burrito">Chicken & Green Chile Burrito</label>
-          <label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno Burrito">Chile Relleno Burrito</label>
+          <label class="item">
+            <input type="radio" name="mealType" value="Burrito">
+            Burrito
+          </label>
+
+          <label class="item">
+            <input type="radio" name="mealType" value="3 Tacos">
+            3 Tacos
+          </label>
         </div>
       </div>
 
-      <div class="field">
-        <label>Add-ons</label>
-        <div class="checkbox-group">
-          <label class="item"><input type="checkbox" id="addRice">Rice</label>
-          <label class="item"><input type="checkbox" id="addCheese">Cheese</label>
-          <label class="item"><input type="checkbox" id="addGreenOnion">Green Onion</label>
-          <label class="item"><input type="checkbox" id="addLettuce">Lettuce</label>
+      <div id="burritoSection" class="hidden">
+        <div class="field">
+          <label class="main-label">Burrito Choice</label>
+          <div class="radio-group">
+            <label class="item"><input type="radio" name="burritoChoice" value="Beef & Red Chile Burrito">Beef & Red Chile Burrito</label>
+            <label class="item"><input type="radio" name="burritoChoice" value="Beef & Green Chile Burrito">Beef & Green Chile Burrito</label>
+            <label class="item"><input type="radio" name="burritoChoice" value="Chicken & Green Chile Burrito">Chicken & Green Chile Burrito</label>
+            <label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno Burrito">Chile Relleno Burrito</label>
+          </div>
         </div>
-      </div>
-
-      <div class="field">
-        <label class="item">
-          <input type="checkbox" id="extraTaco">
-          Add up to 1 taco
-        </label>
-      </div>
-
-      <div id="extraTacoSection" class="hidden">
 
         <div class="field">
-          <label>Extra Taco Type</label>
-          <div class="radio-group">
-            <label class="item"><input type="radio" name="extraTacoType" value="Picadillo Taco">Picadillo Taco</label>
-            <label class="item"><input type="radio" name="extraTacoType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+          <label class="main-label">Add-ons</label>
+          <div class="checkbox-group">
+            <label class="item"><input type="checkbox" id="addRice">Rice</label>
+            <label class="item"><input type="checkbox" id="addCheese">Cheese</label>
+            <label class="item"><input type="checkbox" id="addGreenOnion">Green Onion</label>
+            <label class="item"><input type="checkbox" id="addLettuce">Lettuce</label>
           </div>
         </div>
 
         <div class="field">
           <label class="item">
-            <input type="checkbox" id="extraTacoHotSauce">
-            Add Hot Sauce
+            <input type="checkbox" id="extraTaco">
+            Add up to 1 taco
           </label>
         </div>
 
-      </div>
-    </div>
+        <div id="extraTacoSection" class="hidden">
+          <div class="field">
+            <label class="main-label">Extra Taco Type</label>
+            <div class="radio-group">
+              <label class="item"><input type="radio" name="extraTacoType" value="Picadillo Taco">Picadillo Taco</label>
+              <label class="item"><input type="radio" name="extraTacoType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+            </div>
+          </div>
 
-    <div id="tacoSection" class="hidden">
-
-      <div class="field">
-        <label>3 Taco Order Type</label>
-        <div class="radio-group">
-          <label class="item"><input type="radio" name="tacoPlateType" value="Picadillo Taco">Picadillo Taco</label>
-          <label class="item"><input type="radio" name="tacoPlateType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+          <div class="field">
+            <label class="item">
+              <input type="checkbox" id="extraTacoHotSauce">
+              Add Hot Sauce
+            </label>
+          </div>
         </div>
       </div>
 
-      <div class="field">
-        <label class="item">
-          <input type="checkbox" id="tacoPlateHotSauce">
-          Add Hot Sauce
-        </label>
+      <div id="tacoSection" class="hidden">
+        <div class="field">
+          <label class="main-label">3 Taco Order Type</label>
+          <div class="radio-group">
+            <label class="item"><input type="radio" name="tacoPlateType" value="Picadillo Taco">Picadillo Taco</label>
+            <label class="item"><input type="radio" name="tacoPlateType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="item">
+            <input type="checkbox" id="tacoPlateHotSauce">
+            Add Hot Sauce
+          </label>
+        </div>
       </div>
 
-    </div>
+      <button type="submit">Submit Order</button>
+    </form>
 
-    <button type="submit">Submit Order</button>
+    <div id="status"></div>
+  </div>
 
-  </form>
+  <script>
+    const API_BASE = "https://script.google.com/a/macros/southbayca.org/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
 
-  <div id="status"></div>
-
-</div>
-
-<script>
-const API_BASE = "https://script.google.com/a/macros/southbayca.org/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
-
-function setStatus(msg, isError = false) {
-  const el = document.getElementById("status");
-  el.textContent = msg;
-  el.style.color = isError ? "#b00020" : "#1b5e20";
-}
-
-async function loadNames() {
-  try {
-    const res = await fetch(API_BASE + "?action=getNames", { method: "GET" });
-    const data = await res.json();
-
-    if (!data.ok) throw new Error(data.error || "Unable to load names.");
-
-    const select = document.getElementById("memberName");
-    select.innerHTML = '<option value="">Select Name</option>';
-
-    data.names.forEach(name => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      select.appendChild(opt);
-    });
-
-    if (!data.names.length) {
-      select.innerHTML = '<option value="">No names found</option>';
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById("status");
+      el.textContent = msg;
+      el.style.color = isError ? "#b00020" : "#1b5e20";
     }
-  } catch (err) {
-    setStatus("Name load failed: " + err.message, true);
-    document.getElementById("memberName").innerHTML =
-      '<option value="">Unable to load names</option>';
-  }
-}
 
-function updateMeal() {
-  const type = document.querySelector('input[name="mealType"]:checked')?.value;
+    function loadNames() {
+      window.handleNamesResponse = function(data) {
+        const select = document.getElementById("memberName");
 
-  document.getElementById("burritoSection").classList.add("hidden");
-  document.getElementById("tacoSection").classList.add("hidden");
+        if (!data || !data.ok) {
+          setStatus("Name load failed: " + ((data && data.error) || "Unknown error"), true);
+          select.innerHTML = '<option value="">Unable to load names</option>';
+          return;
+        }
 
-  if (type === "Burrito") {
-    document.getElementById("burritoSection").classList.remove("hidden");
-  }
+        select.innerHTML = '<option value="">Select Name</option>';
 
-  if (type === "3 Tacos") {
-    document.getElementById("tacoSection").classList.remove("hidden");
-  }
-}
+        data.names.forEach(function(name) {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+        });
 
-function updateExtra() {
-  const checked = document.getElementById("extraTaco").checked;
+        if (!data.names.length) {
+          select.innerHTML = '<option value="">No names found</option>';
+        }
+      };
 
-  if (checked) {
-    document.getElementById("extraTacoSection").classList.remove("hidden");
-  } else {
-    document.getElementById("extraTacoSection").classList.add("hidden");
-  }
-}
+      const oldScript = document.getElementById("namesJsonp");
+      if (oldScript) oldScript.remove();
 
-document.querySelectorAll('input[name="mealType"]').forEach(el => {
-  el.addEventListener("change", updateMeal);
-});
+      const script = document.createElement("script");
+      script.id = "namesJsonp";
+      script.src = API_BASE + "?action=getNames&callback=handleNamesResponse&_=" + Date.now();
+      script.onerror = function() {
+        setStatus("Name load failed: unable to reach Apps Script endpoint.", true);
+        document.getElementById("memberName").innerHTML =
+          '<option value="">Unable to load names</option>';
+      };
 
-document.getElementById("extraTaco").addEventListener("change", updateExtra);
+      document.body.appendChild(script);
+    }
 
-document.getElementById("mealForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
+    function updateMeal() {
+      const type = document.querySelector('input[name="mealType"]:checked')?.value;
 
-  const formData = {
-    memberName: document.getElementById("memberName").value,
-    mealType: document.querySelector('input[name="mealType"]:checked')?.value || "",
-    burritoChoice: document.querySelector('input[name="burritoChoice"]:checked')?.value || "",
-    addRice: document.getElementById("addRice").checked,
-    addCheese: document.getElementById("addCheese").checked,
-    addGreenOnion: document.getElementById("addGreenOnion").checked,
-    addLettuce: document.getElementById("addLettuce").checked,
-    extraTaco: document.getElementById("extraTaco").checked,
-    extraTacoType: document.querySelector('input[name="extraTacoType"]:checked')?.value || "",
-    extraTacoHotSauce: document.getElementById("extraTacoHotSauce").checked,
-    tacoPlateType: document.querySelector('input[name="tacoPlateType"]:checked')?.value || "",
-    tacoPlateHotSauce: document.getElementById("tacoPlateHotSauce").checked
-  };
+      document.getElementById("burritoSection").classList.add("hidden");
+      document.getElementById("tacoSection").classList.add("hidden");
 
-  try {
-    const res = await fetch(API_BASE, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({
-        action: "submitOrder",
-        formData: formData
-      })
+      if (type === "Burrito") {
+        document.getElementById("burritoSection").classList.remove("hidden");
+      }
+
+      if (type === "3 Tacos") {
+        document.getElementById("tacoSection").classList.remove("hidden");
+      }
+    }
+
+    function updateExtra() {
+      const checked = document.getElementById("extraTaco").checked;
+
+      if (checked) {
+        document.getElementById("extraTacoSection").classList.remove("hidden");
+      } else {
+        document.getElementById("extraTacoSection").classList.add("hidden");
+      }
+    }
+
+    document.querySelectorAll('input[name="mealType"]').forEach(function(el) {
+      el.addEventListener("change", updateMeal);
     });
 
-    const data = await res.json();
+    document.getElementById("extraTaco").addEventListener("change", updateExtra);
 
-    if (!data.ok) throw new Error(data.error || "Submit failed.");
+    document.getElementById("mealForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
 
-    setStatus(data.message || "Order submitted successfully.");
-    document.getElementById("mealForm").reset();
-    document.getElementById("burritoSection").classList.add("hidden");
-    document.getElementById("tacoSection").classList.add("hidden");
-    document.getElementById("extraTacoSection").classList.add("hidden");
-  } catch (err) {
-    setStatus("Submit failed: " + err.message, true);
-  }
-});
+      const memberName = document.getElementById("memberName").value;
+      const mealType = document.querySelector('input[name="mealType"]:checked')?.value || "";
+      const burritoChoice = document.querySelector('input[name="burritoChoice"]:checked')?.value || "";
+      const extraTaco = document.getElementById("extraTaco").checked;
+      const extraTacoType = document.querySelector('input[name="extraTacoType"]:checked')?.value || "";
+      const tacoPlateType = document.querySelector('input[name="tacoPlateType"]:checked')?.value || "";
 
-loadNames();
-</script>
+      if (!memberName) {
+        setStatus("Please select your name.", true);
+        return;
+      }
 
+      if (!mealType) {
+        setStatus("Please choose Burrito or 3 Tacos.", true);
+        return;
+      }
+
+      if (mealType === "Burrito" && !burritoChoice) {
+        setStatus("Please choose a burrito option.", true);
+        return;
+      }
+
+      if (mealType === "3 Tacos" && !tacoPlateType) {
+        setStatus("Please choose a 3 taco order type.", true);
+        return;
+      }
+
+      if (mealType === "Burrito" && extraTaco && !extraTacoType) {
+        setStatus("Please choose the extra taco type.", true);
+        return;
+      }
+
+      const formData = {
+        memberName: memberName,
+        mealType: mealType,
+        burritoChoice: burritoChoice,
+        addRice: document.getElementById("addRice").checked,
+        addCheese: document.getElementById("addCheese").checked,
+        addGreenOnion: document.getElementById("addGreenOnion").checked,
+        addLettuce: document.getElementById("addLettuce").checked,
+        extraTaco: extraTaco,
+        extraTacoType: extraTacoType,
+        extraTacoHotSauce: document.getElementById("extraTacoHotSauce").checked,
+        tacoPlateType: tacoPlateType,
+        tacoPlateHotSauce: document.getElementById("tacoPlateHotSauce").checked
+      };
+
+      setStatus("Submitting...");
+
+      try {
+        const res = await fetch(API_BASE, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify({
+            action: "submitOrder",
+            formData: formData
+          })
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+          throw new Error(data.error || "Submit failed.");
+        }
+
+        setStatus(data.message || "Order submitted successfully.");
+        document.getElementById("mealForm").reset();
+        document.getElementById("burritoSection").classList.add("hidden");
+        document.getElementById("tacoSection").classList.add("hidden");
+        document.getElementById("extraTacoSection").classList.add("hidden");
+      } catch (err) {
+        setStatus("Submit failed: " + err.message, true);
+      }
+    });
+
+    loadNames();
+  </script>
 </body>
 </html>
