@@ -100,101 +100,94 @@
       color: #5a160f;
     }
 
-    .lock-wrap {
+    .picker-wrap {
       display: flex;
-      gap: 10px;
       justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
-
-    .lock-wheel {
-      width: 62px;
-      padding: 6px 6px 8px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, #3d3d3d, #1f1f1f);
-      box-shadow:
-        inset 0 2px 4px rgba(255,255,255,.15),
-        inset 0 -2px 4px rgba(0,0,0,.4),
-        0 4px 10px rgba(0,0,0,.25);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      user-select: none;
-    }
-
-    .wheel-btn {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: #f2f2f2;
-      font-size: 14px;
-      line-height: 1;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
       padding: 4px 0;
-      cursor: pointer;
-      border-radius: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
 
-    .wheel-btn:hover {
-      background: rgba(255,255,255,.08);
+    .picker-wrap::-webkit-scrollbar {
+      display: none;
     }
 
-    .wheel-window {
-      width: 100%;
-      height: 58px;
-      margin: 4px 0;
-      border-radius: 10px;
-      background: linear-gradient(180deg, #d9d9d9, #fafafa 45%, #d9d9d9);
-      border: 1px solid #999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .picker-wheel {
+      flex: 0 0 56px;
+      width: 56px;
+      height: 164px;
       position: relative;
-      overflow: hidden;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #f8f8f8, #d7d7d7);
+      border: 1px solid #aaa;
       box-shadow:
-        inset 0 2px 6px rgba(0,0,0,.18),
-        inset 0 -2px 6px rgba(255,255,255,.7);
+        inset 0 2px 6px rgba(255,255,255,.85),
+        inset 0 -2px 6px rgba(0,0,0,.12),
+        0 4px 12px rgba(0,0,0,.18);
+      overflow: hidden;
+      touch-action: pan-y;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .wheel-window::before,
-    .wheel-window::after {
+    .picker-wheel::before,
+    .picker-wheel::after {
       content: "";
       position: absolute;
       left: 0;
       width: 100%;
-      height: 14px;
+      height: 42px;
+      z-index: 3;
       pointer-events: none;
     }
 
-    .wheel-window::before {
+    .picker-wheel::before {
       top: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,0));
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,0));
     }
 
-    .wheel-window::after {
+    .picker-wheel::after {
       bottom: 0;
-      background: linear-gradient(0deg, rgba(0,0,0,.14), rgba(0,0,0,0));
+      background: linear-gradient(0deg, rgba(255,255,255,.92), rgba(255,255,255,0));
     }
 
-    .wheel-digit {
-      font-size: 34px;
+    .picker-highlight {
+      position: absolute;
+      left: 0;
+      top: 62px;
+      width: 100%;
+      height: 40px;
+      border-top: 1px solid rgba(0,0,0,.12);
+      border-bottom: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.28);
+      z-index: 2;
+      pointer-events: none;
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.6),
+        inset 0 -1px 2px rgba(255,255,255,.6);
+    }
+
+    .picker-list {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      will-change: transform;
+      z-index: 1;
+    }
+
+    .picker-item {
+      height: 40px;
+      line-height: 40px;
+      text-align: center;
+      font-size: 28px;
       font-weight: 700;
       color: #111;
-      line-height: 1;
-      min-width: 1ch;
-      text-align: center;
-      transition: transform .12s ease, opacity .12s ease;
-    }
-
-    .wheel-digit.bump-up {
-      transform: translateY(-6px);
-      opacity: .8;
-    }
-
-    .wheel-digit.bump-down {
-      transform: translateY(6px);
-      opacity: .8;
+      font-variant-numeric: tabular-nums;
     }
 
     button {
@@ -238,16 +231,24 @@
         font-size: 28px;
       }
 
-      .lock-wheel {
-        width: 56px;
+      .picker-wrap {
+        gap: 6px;
+        justify-content: flex-start;
       }
 
-      .wheel-window {
-        height: 54px;
+      .picker-wheel {
+        flex: 0 0 52px;
+        width: 52px;
+        height: 156px;
       }
 
-      .wheel-digit {
-        font-size: 30px;
+      .picker-highlight {
+        top: 58px;
+        height: 40px;
+      }
+
+      .picker-item {
+        font-size: 26px;
       }
     }
   </style>
@@ -271,35 +272,26 @@
       <div class="serial-label-top">Serial Number</div>
       <label class="main">Set your serial №</label>
 
-      <div id="serialContainer" class="lock-wrap">
-        <div class="lock-wheel" data-index="0">
-          <button type="button" class="wheel-btn up" aria-label="Increase digit 1">▲</button>
-          <div class="wheel-window"><div class="wheel-digit">0</div></div>
-          <button type="button" class="wheel-btn down" aria-label="Decrease digit 1">▼</button>
+      <div id="serialContainer" class="picker-wrap">
+        <div class="picker-wheel" data-index="0">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
         </div>
-
-        <div class="lock-wheel" data-index="1">
-          <button type="button" class="wheel-btn up" aria-label="Increase digit 2">▲</button>
-          <div class="wheel-window"><div class="wheel-digit">0</div></div>
-          <button type="button" class="wheel-btn down" aria-label="Decrease digit 2">▼</button>
+        <div class="picker-wheel" data-index="1">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
         </div>
-
-        <div class="lock-wheel" data-index="2">
-          <button type="button" class="wheel-btn up" aria-label="Increase digit 3">▲</button>
-          <div class="wheel-window"><div class="wheel-digit">0</div></div>
-          <button type="button" class="wheel-btn down" aria-label="Decrease digit 3">▼</button>
+        <div class="picker-wheel" data-index="2">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
         </div>
-
-        <div class="lock-wheel" data-index="3">
-          <button type="button" class="wheel-btn up" aria-label="Increase digit 4">▲</button>
-          <div class="wheel-window"><div class="wheel-digit">0</div></div>
-          <button type="button" class="wheel-btn down" aria-label="Decrease digit 4">▼</button>
+        <div class="picker-wheel" data-index="3">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
         </div>
-
-        <div class="lock-wheel" data-index="4">
-          <button type="button" class="wheel-btn up" aria-label="Increase digit 5">▲</button>
-          <div class="wheel-window"><div class="wheel-digit">0</div></div>
-          <button type="button" class="wheel-btn down" aria-label="Decrease digit 5">▼</button>
+        <div class="picker-wheel" data-index="4">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
         </div>
       </div>
     </div>
@@ -391,6 +383,8 @@
 
 <script>
   const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
+  const ITEM_HEIGHT = 40;
+  const VISIBLE_CENTER_TOP = 62;
   const serialDigits = [0, 0, 0, 0, 0];
 
   function setStatus(msg, color = "green") {
@@ -405,64 +399,104 @@
     });
   }
 
-  function renderSerialWheels() {
-    document.querySelectorAll(".lock-wheel").forEach((wheel, index) => {
-      const digitEl = wheel.querySelector(".wheel-digit");
-      digitEl.textContent = serialDigits[index];
-    });
+  function buildPickerList() {
+    let html = "";
+    for (let block = 0; block < 5; block++) {
+      for (let d = 0; d <= 9; d++) {
+        html += `<div class="picker-item">${d}</div>`;
+      }
+    }
+    return html;
   }
 
-  function bumpDigit(index, direction) {
-    const wheel = document.querySelectorAll(".lock-wheel")[index];
-    const digitEl = wheel.querySelector(".wheel-digit");
+  function setWheelPosition(index, animate = true) {
+    const wheel = document.querySelectorAll(".picker-wheel")[index];
+    const list = wheel.querySelector(".picker-list");
+    const targetIndex = 20 + serialDigits[index];
+    const y = VISIBLE_CENTER_TOP - (targetIndex * ITEM_HEIGHT);
 
-    serialDigits[index] = (serialDigits[index] + direction + 10) % 10;
-
-    digitEl.classList.remove("bump-up", "bump-down");
-    void digitEl.offsetWidth;
-
-    digitEl.textContent = serialDigits[index];
-    digitEl.classList.add(direction > 0 ? "bump-up" : "bump-down");
-
-    setTimeout(() => {
-      digitEl.classList.remove("bump-up", "bump-down");
-    }, 140);
+    list.style.transition = animate ? "transform 180ms cubic-bezier(.22,.8,.32,1)" : "none";
+    list.style.transform = `translateY(${y}px)`;
   }
 
   function initSerialWheels() {
-    document.querySelectorAll(".lock-wheel").forEach((wheel, index) => {
-      const upBtn = wheel.querySelector(".wheel-btn.up");
-      const downBtn = wheel.querySelector(".wheel-btn.down");
-      const windowEl = wheel.querySelector(".wheel-window");
+    document.querySelectorAll(".picker-wheel").forEach((wheel, index) => {
+      const list = wheel.querySelector(".picker-list");
+      list.innerHTML = buildPickerList();
+      setWheelPosition(index, false);
 
-      upBtn.addEventListener("click", () => bumpDigit(index, 1));
-      downBtn.addEventListener("click", () => bumpDigit(index, -1));
+      let startY = 0;
+      let startTransform = 0;
+      let currentTransform = 0;
+      let dragging = false;
+      let moved = false;
 
-      windowEl.addEventListener("wheel", (e) => {
+      function readTranslateY() {
+        const style = window.getComputedStyle(list);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        return matrix.m42;
+      }
+
+      function begin(y) {
+        dragging = true;
+        moved = false;
+        startY = y;
+        currentTransform = readTranslateY();
+        startTransform = currentTransform;
+        list.style.transition = "none";
+      }
+
+      function move(y) {
+        if (!dragging) return;
+        const delta = y - startY;
+        if (Math.abs(delta) > 2) moved = true;
+        currentTransform = startTransform + delta;
+        list.style.transform = `translateY(${currentTransform}px)`;
+      }
+
+      function end() {
+        if (!dragging) return;
+        dragging = false;
+
+        let nearest = Math.round((VISIBLE_CENTER_TOP - currentTransform) / ITEM_HEIGHT);
+        if (nearest < 10) nearest = 10;
+        if (nearest > 39) nearest = 39;
+
+        const digit = ((nearest % 10) + 10) % 10;
+        serialDigits[index] = digit;
+        setWheelPosition(index, true);
+      }
+
+      wheel.addEventListener("touchstart", (e) => begin(e.touches[0].clientY), { passive: true });
+      wheel.addEventListener("touchmove", (e) => move(e.touches[0].clientY), { passive: true });
+      wheel.addEventListener("touchend", end, { passive: true });
+
+      wheel.addEventListener("mousedown", (e) => {
         e.preventDefault();
-        bumpDigit(index, e.deltaY < 0 ? 1 : -1);
+        begin(e.clientY);
+      });
+
+      window.addEventListener("mousemove", (e) => move(e.clientY));
+      window.addEventListener("mouseup", end);
+
+      wheel.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        serialDigits[index] = (serialDigits[index] + (e.deltaY > 0 ? 1 : 9)) % 10;
+        setWheelPosition(index, true);
       }, { passive: false });
 
-      let touchStartY = null;
-
-      windowEl.addEventListener("touchstart", (e) => {
-        touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-
-      windowEl.addEventListener("touchend", (e) => {
-        if (touchStartY === null) return;
-        const endY = e.changedTouches[0].clientY;
-        const diff = touchStartY - endY;
-
-        if (Math.abs(diff) > 12) {
-          bumpDigit(index, diff > 0 ? 1 : -1);
+      wheel.addEventListener("click", (e) => {
+        if (moved) return;
+        const rect = wheel.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        if (y < rect.height / 2) {
+          serialDigits[index] = (serialDigits[index] + 9) % 10;
+        } else {
+          serialDigits[index] = (serialDigits[index] + 1) % 10;
         }
-
-        touchStartY = null;
-      }, { passive: true });
+        setWheelPosition(index, true);
+      });
     });
-
-    renderSerialWheels();
   }
 
   function getSerialNumber() {
@@ -472,8 +506,8 @@
   function resetSerialWheels() {
     for (let i = 0; i < serialDigits.length; i++) {
       serialDigits[i] = 0;
+      setWheelPosition(i, false);
     }
-    renderSerialWheels();
   }
 
   function loadNames() {
@@ -646,7 +680,7 @@
           throw new Error(json.error || "Submit failed.");
         }
         setStatus(json.message || "Order submitted!");
-      } catch (parseErr) {
+      } catch {
         setStatus("Order submitted!");
       }
 
