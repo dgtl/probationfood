@@ -94,6 +94,109 @@
       margin: 0;
     }
 
+    .serial-label-top {
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #5a160f;
+    }
+
+    .lock-wrap {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .lock-wheel {
+      width: 62px;
+      padding: 6px 6px 8px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #3d3d3d, #1f1f1f);
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,.15),
+        inset 0 -2px 4px rgba(0,0,0,.4),
+        0 4px 10px rgba(0,0,0,.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+
+    .wheel-btn {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #f2f2f2;
+      font-size: 14px;
+      line-height: 1;
+      padding: 4px 0;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .wheel-btn:hover {
+      background: rgba(255,255,255,.08);
+    }
+
+    .wheel-window {
+      width: 100%;
+      height: 58px;
+      margin: 4px 0;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #d9d9d9, #fafafa 45%, #d9d9d9);
+      border: 1px solid #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,.18),
+        inset 0 -2px 6px rgba(255,255,255,.7);
+    }
+
+    .wheel-window::before,
+    .wheel-window::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 14px;
+      pointer-events: none;
+    }
+
+    .wheel-window::before {
+      top: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,0));
+    }
+
+    .wheel-window::after {
+      bottom: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,.14), rgba(0,0,0,0));
+    }
+
+    .wheel-digit {
+      font-size: 34px;
+      font-weight: 700;
+      color: #111;
+      line-height: 1;
+      min-width: 1ch;
+      text-align: center;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+
+    .wheel-digit.bump-up {
+      transform: translateY(-6px);
+      opacity: .8;
+    }
+
+    .wheel-digit.bump-down {
+      transform: translateY(6px);
+      opacity: .8;
+    }
+
     button {
       background: #8b1e14;
       color: white;
@@ -134,6 +237,18 @@
       h1 {
         font-size: 28px;
       }
+
+      .lock-wheel {
+        width: 56px;
+      }
+
+      .wheel-window {
+        height: 54px;
+      }
+
+      .wheel-digit {
+        font-size: 30px;
+      }
     }
   </style>
 </head>
@@ -145,10 +260,48 @@
 
   <form id="mealForm">
     <div class="field">
-      <label class="main" for="memberName">Member Name</label>
+      <div style="margin-bottom:6px;font-weight:bold;">Who's eating this order?</div>
+      <label class="main" for="memberName">Your Name</label>
       <select id="memberName" required>
         <option value="">Loading names...</option>
       </select>
+    </div>
+
+    <div class="field">
+      <div class="serial-label-top">Serial Number</div>
+      <label class="main">Set your serial №</label>
+
+      <div id="serialContainer" class="lock-wrap">
+        <div class="lock-wheel" data-index="0">
+          <button type="button" class="wheel-btn up" aria-label="Increase digit 1">▲</button>
+          <div class="wheel-window"><div class="wheel-digit">0</div></div>
+          <button type="button" class="wheel-btn down" aria-label="Decrease digit 1">▼</button>
+        </div>
+
+        <div class="lock-wheel" data-index="1">
+          <button type="button" class="wheel-btn up" aria-label="Increase digit 2">▲</button>
+          <div class="wheel-window"><div class="wheel-digit">0</div></div>
+          <button type="button" class="wheel-btn down" aria-label="Decrease digit 2">▼</button>
+        </div>
+
+        <div class="lock-wheel" data-index="2">
+          <button type="button" class="wheel-btn up" aria-label="Increase digit 3">▲</button>
+          <div class="wheel-window"><div class="wheel-digit">0</div></div>
+          <button type="button" class="wheel-btn down" aria-label="Decrease digit 3">▼</button>
+        </div>
+
+        <div class="lock-wheel" data-index="3">
+          <button type="button" class="wheel-btn up" aria-label="Increase digit 4">▲</button>
+          <div class="wheel-window"><div class="wheel-digit">0</div></div>
+          <button type="button" class="wheel-btn down" aria-label="Decrease digit 4">▼</button>
+        </div>
+
+        <div class="lock-wheel" data-index="4">
+          <button type="button" class="wheel-btn up" aria-label="Increase digit 5">▲</button>
+          <div class="wheel-window"><div class="wheel-digit">0</div></div>
+          <button type="button" class="wheel-btn down" aria-label="Decrease digit 5">▼</button>
+        </div>
+      </div>
     </div>
 
     <div class="section">Meal Selection</div>
@@ -238,6 +391,7 @@
 
 <script>
   const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
+  const serialDigits = [0, 0, 0, 0, 0];
 
   function setStatus(msg, color = "green") {
     const el = document.getElementById("status");
@@ -249,6 +403,77 @@
     document.querySelectorAll('input[name="' + name + '"]').forEach(el => {
       el.checked = false;
     });
+  }
+
+  function renderSerialWheels() {
+    document.querySelectorAll(".lock-wheel").forEach((wheel, index) => {
+      const digitEl = wheel.querySelector(".wheel-digit");
+      digitEl.textContent = serialDigits[index];
+    });
+  }
+
+  function bumpDigit(index, direction) {
+    const wheel = document.querySelectorAll(".lock-wheel")[index];
+    const digitEl = wheel.querySelector(".wheel-digit");
+
+    serialDigits[index] = (serialDigits[index] + direction + 10) % 10;
+
+    digitEl.classList.remove("bump-up", "bump-down");
+    void digitEl.offsetWidth;
+
+    digitEl.textContent = serialDigits[index];
+    digitEl.classList.add(direction > 0 ? "bump-up" : "bump-down");
+
+    setTimeout(() => {
+      digitEl.classList.remove("bump-up", "bump-down");
+    }, 140);
+  }
+
+  function initSerialWheels() {
+    document.querySelectorAll(".lock-wheel").forEach((wheel, index) => {
+      const upBtn = wheel.querySelector(".wheel-btn.up");
+      const downBtn = wheel.querySelector(".wheel-btn.down");
+      const windowEl = wheel.querySelector(".wheel-window");
+
+      upBtn.addEventListener("click", () => bumpDigit(index, 1));
+      downBtn.addEventListener("click", () => bumpDigit(index, -1));
+
+      windowEl.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        bumpDigit(index, e.deltaY < 0 ? 1 : -1);
+      }, { passive: false });
+
+      let touchStartY = null;
+
+      windowEl.addEventListener("touchstart", (e) => {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      windowEl.addEventListener("touchend", (e) => {
+        if (touchStartY === null) return;
+        const endY = e.changedTouches[0].clientY;
+        const diff = touchStartY - endY;
+
+        if (Math.abs(diff) > 12) {
+          bumpDigit(index, diff > 0 ? 1 : -1);
+        }
+
+        touchStartY = null;
+      }, { passive: true });
+    });
+
+    renderSerialWheels();
+  }
+
+  function getSerialNumber() {
+    return serialDigits.join("");
+  }
+
+  function resetSerialWheels() {
+    for (let i = 0; i < serialDigits.length; i++) {
+      serialDigits[i] = 0;
+    }
+    renderSerialWheels();
   }
 
   function loadNames() {
@@ -300,14 +525,12 @@
 
     if (type === "Burrito") {
       burritoSection.classList.remove("hidden");
-
       clearRadioGroup("tacoPlateType");
       document.getElementById("tacoPlateHotSauce").checked = false;
     }
 
     if (type === "3 Tacos") {
       tacoSection.classList.remove("hidden");
-
       clearRadioGroup("burritoChoice");
       document.getElementById("addRice").checked = false;
       document.getElementById("addCheese").checked = false;
@@ -345,6 +568,7 @@
     const submitBtn = document.getElementById("submitBtn");
 
     const memberName = document.getElementById("memberName").value;
+    const serialNumber = getSerialNumber();
     const mealType = document.querySelector('input[name="mealType"]:checked')?.value || "";
     const burritoChoice = document.querySelector('input[name="burritoChoice"]:checked')?.value || "";
     const extraTaco = document.getElementById("extraTaco").checked;
@@ -352,7 +576,12 @@
     const tacoPlateType = document.querySelector('input[name="tacoPlateType"]:checked')?.value || "";
 
     if (!memberName) {
-      setStatus("Please select your name.", "red");
+      setStatus("Please select who’s eating this order.", "red");
+      return;
+    }
+
+    if (!/^\d{5}$/.test(serialNumber)) {
+      setStatus("Please align all 5 serial digits.", "red");
       return;
     }
 
@@ -378,6 +607,7 @@
 
     const data = {
       memberName: memberName,
+      serialNumber: serialNumber,
       mealType: mealType,
       burritoChoice: burritoChoice,
       addRice: document.getElementById("addRice").checked,
@@ -408,15 +638,23 @@
         })
       });
 
-      // Some Apps Script responses may not return JSON cleanly through redirects.
-      // We treat a completed fetch as success here.
-      await res.text();
+      const text = await res.text();
 
-      setStatus("Order submitted!");
+      try {
+        const json = JSON.parse(text);
+        if (!json.ok) {
+          throw new Error(json.error || "Submit failed.");
+        }
+        setStatus(json.message || "Order submitted!");
+      } catch (parseErr) {
+        setStatus("Order submitted!");
+      }
+
       document.getElementById("mealForm").reset();
       document.getElementById("burritoSection").classList.add("hidden");
       document.getElementById("tacoSection").classList.add("hidden");
       document.getElementById("extraTacoSection").classList.add("hidden");
+      resetSerialWheels();
     } catch (err) {
       setStatus("Submit failed: " + err.message, "red");
     } finally {
@@ -425,6 +663,7 @@
     }
   });
 
+  initSerialWheels();
   loadNames();
 </script>
 
