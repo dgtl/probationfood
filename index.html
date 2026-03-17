@@ -141,18 +141,18 @@
       left: 0;
       width: 100%;
       height: 42px;
-      z-index: 3;
+      z-index: 5;
       pointer-events: none;
     }
 
     .picker-wheel::before {
       top: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,0));
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,0));
     }
 
     .picker-wheel::after {
       bottom: 0;
-      background: linear-gradient(0deg, rgba(255,255,255,.92), rgba(255,255,255,0));
+      background: linear-gradient(0deg, rgba(255,255,255,.96), rgba(255,255,255,0));
     }
 
     .picker-highlight {
@@ -161,14 +161,15 @@
       top: 62px;
       width: 100%;
       height: 40px;
-      border-top: 1px solid rgba(0,0,0,.12);
-      border-bottom: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.28);
-      z-index: 2;
+      z-index: 6;
       pointer-events: none;
+      background: rgba(255,255,255,.38);
+      border-top: 2px solid rgba(90,22,15,.55);
+      border-bottom: 2px solid rgba(90,22,15,.55);
       box-shadow:
-        inset 0 1px 2px rgba(255,255,255,.6),
-        inset 0 -1px 2px rgba(255,255,255,.6);
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -1px 0 rgba(255,255,255,.9),
+        0 0 0 1px rgba(90,22,15,.08);
     }
 
     .picker-list {
@@ -184,10 +185,23 @@
       height: 40px;
       line-height: 40px;
       text-align: center;
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 700;
-      color: #111;
+      color: #9a9a9a;
+      opacity: .38;
       font-variant-numeric: tabular-nums;
+      transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
+    }
+
+    .picker-item.near {
+      color: #6f6f6f;
+      opacity: .62;
+    }
+
+    .picker-item.selected {
+      color: #111;
+      opacity: 1;
+      transform: scale(1.04);
     }
 
     button {
@@ -245,6 +259,8 @@
       .picker-highlight {
         top: 58px;
         height: 40px;
+        border-top: 2px solid rgba(90,22,15,.65);
+        border-bottom: 2px solid rgba(90,22,15,.65);
       }
 
       .picker-item {
@@ -399,11 +415,22 @@
     });
   }
 
-  function buildPickerList() {
+  function buildPickerList(current) {
     let html = "";
     for (let block = 0; block < 5; block++) {
       for (let d = 0; d <= 9; d++) {
-        html += `<div class="picker-item">${d}</div>`;
+        let cls = "picker-item";
+
+        if (block === 2 && d === current) {
+          cls += " selected";
+        } else if (
+          block === 2 &&
+          (d === (current + 9) % 10 || d === (current + 1) % 10)
+        ) {
+          cls += " near";
+        }
+
+        html += `<div class="${cls}">${d}</div>`;
       }
     }
     return html;
@@ -415,6 +442,7 @@
     const targetIndex = 20 + serialDigits[index];
     const y = VISIBLE_CENTER_TOP - (targetIndex * ITEM_HEIGHT);
 
+    list.innerHTML = buildPickerList(serialDigits[index]);
     list.style.transition = animate ? "transform 180ms cubic-bezier(.22,.8,.32,1)" : "none";
     list.style.transform = `translateY(${y}px)`;
   }
@@ -422,7 +450,7 @@
   function initSerialWheels() {
     document.querySelectorAll(".picker-wheel").forEach((wheel, index) => {
       const list = wheel.querySelector(".picker-list");
-      list.innerHTML = buildPickerList();
+      list.innerHTML = buildPickerList(serialDigits[index]);
       setWheelPosition(index, false);
 
       let startY = 0;
