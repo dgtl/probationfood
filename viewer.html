@@ -178,11 +178,6 @@
       <h2>Extra Tacos</h2>
       <div id="extraTacos"></div>
     </div>
-
-    <div class="card">
-      <h2>Add-Ons</h2>
-      <div id="addons"></div>
-    </div>
   </div>
 
   <div class="table-wrap">
@@ -250,15 +245,6 @@
       renderSection("extraTacos", [
         { label: "Picadillo Taco", count: data.totals.extraTacos["Picadillo Taco"] || 0 },
         { label: "Chicken & Green Chile", count: data.totals.extraTacos["Chicken & Green Chile"] || 0 }
-      ]);
-
-      renderSection("addons", [
-        { label: "Rice", count: data.totals.addOns.rice || 0 },
-        { label: "Cheese", count: data.totals.addOns.cheese || 0 },
-        { label: "Green Onion", count: data.totals.addOns.greenOnion || 0 },
-        { label: "Lettuce", count: data.totals.addOns.lettuce || 0 },
-        { label: "Extra Taco Hot Sauce", count: data.totals.addOns.extraHotSauce || 0 },
-        { label: "3 Taco Hot Sauce", count: data.totals.addOns.tacoPlateHotSauce || 0 }
       ]);
 
       const tbody = document.getElementById("ordersTable");
