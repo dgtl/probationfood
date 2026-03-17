@@ -211,6 +211,7 @@
       font-weight: bold;
       margin-top: 15px;
       cursor: pointer;
+      transition: background-color 160ms ease, transform 120ms ease;
     }
 
     button:hover {
@@ -220,6 +221,10 @@
     button:disabled {
       opacity: .7;
       cursor: not-allowed;
+    }
+
+    button.valid-ready {
+      background: #1f8b3d !important;
     }
 
     .hidden {
@@ -402,6 +407,7 @@
   const ITEM_HEIGHT = 40;
   const VISIBLE_CENTER_TOP = 62;
   const serialDigits = [0, 0, 0, 0, 0];
+  let serialValidationTimer = null;
 
   function setStatus(msg, color = "green") {
     const el = document.getElementById("status");
@@ -445,6 +451,11 @@
     list.innerHTML = buildPickerList(serialDigits[index]);
     list.style.transition = animate ? "transform 180ms cubic-bezier(.22,.8,.32,1)" : "none";
     list.style.transform = `translateY(${y}px)`;
+  }
+
+  function scheduleSerialValidation() {
+    clearTimeout(serialValidationTimer);
+    serialValidationTimer = setTimeout(validateSerialLive, 180);
   }
 
   function initSerialWheels() {
@@ -493,6 +504,7 @@
         const digit = ((nearest % 10) + 10) % 10;
         serialDigits[index] = digit;
         setWheelPosition(index, true);
+        scheduleSerialValidation();
       }
 
       wheel.addEventListener("touchstart", (e) => begin(e.touches[0].clientY), { passive: true });
@@ -511,6 +523,7 @@
         e.preventDefault();
         serialDigits[index] = (serialDigits[index] + (e.deltaY > 0 ? 1 : 9)) % 10;
         setWheelPosition(index, true);
+        scheduleSerialValidation();
       }, { passive: false });
 
       wheel.addEventListener("click", (e) => {
@@ -523,6 +536,7 @@
           serialDigits[index] = (serialDigits[index] + 1) % 10;
         }
         setWheelPosition(index, true);
+        scheduleSerialValidation();
       });
     });
   }
@@ -536,6 +550,45 @@
       serialDigits[i] = 0;
       setWheelPosition(i, false);
     }
+  }
+
+  function setSubmitReady(isReady) {
+    const btn = document.getElementById("submitBtn");
+    btn.classList.toggle("valid-ready", !!isReady);
+  }
+
+  function validateSerialLive() {
+    const memberName = document.getElementById("memberName").value;
+    const serialNumber = getSerialNumber();
+
+    setSubmitReady(false);
+
+    if (!memberName || !/^\d{5}$/.test(serialNumber)) {
+      return;
+    }
+
+    window.validateSerialCallback = function(data) {
+      if (data && data.ok && data.valid) {
+        setSubmitReady(true);
+      } else {
+        setSubmitReady(false);
+      }
+    };
+
+    const oldScript = document.getElementById("jsonpValidate");
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.id = "jsonpValidate";
+    script.src =
+      API +
+      "?action=validateSerial" +
+      "&memberName=" + encodeURIComponent(memberName) +
+      "&serialNumber=" + encodeURIComponent(serialNumber) +
+      "&callback=validateSerialCallback" +
+      "&_=" + Date.now();
+
+    document.body.appendChild(script);
   }
 
   function loadNames() {
@@ -623,6 +676,7 @@
   });
 
   document.getElementById("extraTaco").addEventListener("change", updateExtra);
+  document.getElementById("memberName").addEventListener("change", validateSerialLive);
 
   document.getElementById("mealForm").addEventListener("submit", async function(e) {
     e.preventDefault();
@@ -702,21 +756,28 @@
 
       const text = await res.text();
 
+      let json;
       try {
-        const json = JSON.parse(text);
-        if (!json.ok) {
-          throw new Error(json.error || "Submit failed.");
-        }
-        setStatus(json.message || "Order submitted!");
-      } catch {
-        setStatus("Order submitted!");
+        json = JSON.parse(text);
+      } catch (e) {
+        throw new Error("Invalid server response.");
       }
+
+      if (!json.ok) {
+        setStatus(json.error || "Submission failed.", "red");
+        return;
+      }
+
+      setStatus(json.message || "Order submitted!");
 
       document.getElementById("mealForm").reset();
       document.getElementById("burritoSection").classList.add("hidden");
       document.getElementById("tacoSection").classList.add("hidden");
       document.getElementById("extraTacoSection").classList.add("hidden");
       resetSerialWheels();
+      loadNames();
+      setSubmitReady(false);
+
     } catch (err) {
       setStatus("Submit failed: " + err.message, "red");
     } finally {
