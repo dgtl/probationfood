@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Order Viewer</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #222;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 34px;
+      color: #5a160f;
+    }
+
+    .meta {
+      margin-bottom: 18px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      margin-bottom: 18px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      background: #8b1e14;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #74180f;
+    }
+
+    .summary {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      margin-bottom: 18px;
+    }
+
+    .summary-total {
+      font-size: 42px;
+      font-weight: bold;
+      color: #8b1e14;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      color: #8b1e14;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      flex: 1;
+    }
+
+    .count {
+      font-weight: bold;
+      min-width: 24px;
+      text-align: right;
+    }
+
+    .table-wrap {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+
+    th {
+      background: #8b1e14;
+      color: white;
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    @media (max-width: 700px) {
+      body { padding: 12px; }
+      h1 { font-size: 28px; }
+      .summary-total { font-size: 34px; }
+      th, td { padding: 10px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Live Order Viewer</h1>
+  <div class="meta" id="updated">Loading...</div>
+
+  <div class="toolbar">
+    <button onclick="loadOrders()">Refresh now</button>
+  </div>
+
+  <div class="summary">
+    <div class="muted">Total Orders</div>
+    <div class="summary-total" id="totalOrders">0</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Burritos</h2>
+      <div id="burritos"></div>
+    </div>
+
+    <div class="card">
+      <h2>3 Taco Orders</h2>
+      <div id="tacos3"></div>
+    </div>
+
+    <div class="card">
+      <h2>Extra Tacos</h2>
+      <div id="extraTacos"></div>
+    </div>
+
+    <div class="card">
+      <h2>Add-Ons</h2>
+      <div id="addons"></div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Name</th>
+          <th>Meal</th>
+          <th>Main Choice</th>
+          <th>Extra Taco</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
+
+  function renderSection(targetId, items) {
+    const el = document.getElementById(targetId);
+    el.innerHTML = items.map(item => `
+      <div class="row">
+        <div class="label">${item.label}</div>
+        <div class="count">${item.count}</div>
+      </div>
+    `).join("");
+  }
+
+  function formatTime(v) {
+    if (!v) return "";
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return String(v);
+    return d.toLocaleString();
+  }
+
+  function loadOrders() {
+    window.ordersCallback = function(resp) {
+      if (!resp || !resp.ok) {
+        document.getElementById("updated").textContent =
+          "Load failed: " + ((resp && resp.error) || "Unknown error");
+        return;
+      }
+
+      const data = resp.data;
+      document.getElementById("updated").textContent =
+        "Last refreshed: " + new Date().toLocaleString();
+
+      document.getElementById("totalOrders").textContent = data.totals.totalOrders || 0;
+
+      renderSection("burritos", [
+        { label: "Beef & Red Chile Burrito", count: data.totals.burritos["Beef & Red Chile Burrito"] || 0 },
+        { label: "Beef & Green Chile Burrito", count: data.totals.burritos["Beef & Green Chile Burrito"] || 0 },
+        { label: "Chicken & Green Chile Burrito", count: data.totals.burritos["Chicken & Green Chile Burrito"] || 0 },
+        { label: "Chile Relleno Burrito", count: data.totals.burritos["Chile Relleno Burrito"] || 0 }
+      ]);
+
+      renderSection("tacos3", [
+        { label: "Picadillo Taco", count: data.totals.tacos3["Picadillo Taco"] || 0 },
+        { label: "Chicken & Green Chile", count: data.totals.tacos3["Chicken & Green Chile"] || 0 }
+      ]);
+
+      renderSection("extraTacos", [
+        { label: "Picadillo Taco", count: data.totals.extraTacos["Picadillo Taco"] || 0 },
+        { label: "Chicken & Green Chile", count: data.totals.extraTacos["Chicken & Green Chile"] || 0 }
+      ]);
+
+      renderSection("addons", [
+        { label: "Rice", count: data.totals.addOns.rice || 0 },
+        { label: "Cheese", count: data.totals.addOns.cheese || 0 },
+        { label: "Green Onion", count: data.totals.addOns.greenOnion || 0 },
+        { label: "Lettuce", count: data.totals.addOns.lettuce || 0 },
+        { label: "Extra Taco Hot Sauce", count: data.totals.addOns.extraHotSauce || 0 },
+        { label: "3 Taco Hot Sauce", count: data.totals.addOns.tacoPlateHotSauce || 0 }
+      ]);
+
+      const tbody = document.getElementById("ordersTable");
+      const orders = data.orders || [];
+
+      if (!orders.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="muted">No orders yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = orders.map(order => `
+        <tr>
+          <td>${formatTime(order.timestamp)}</td>
+          <td>${order.memberName || ""}</td>
+          <td>${order.mealType || ""}</td>
+          <td>${order.burritoChoice || order.tacoPlateType || ""}</td>
+          <td>${order.extraTacoType || ""}</td>
+        </tr>
+      `).join("");
+    };
+
+    const oldScript = document.getElementById("jsonpOrders");
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.id = "jsonpOrders";
+    script.src = API + "?action=getOrders&callback=ordersCallback&_=" + Date.now();
+    document.body.appendChild(script);
+  }
+
+  loadOrders();
+  setInterval(loadOrders, 15000);
+</script>
+
+</body>
+</html>
