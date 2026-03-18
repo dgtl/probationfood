@@ -164,7 +164,7 @@
     .picker-highlight {
       position: absolute;
       left: 0;
-      top: 70px;
+      top: 68px;
       width: 100%;
       height: 44px;
       z-index: 6;
@@ -275,6 +275,8 @@
       }
 
       .picker-item {
+        height: 40px;
+        line-height: 40px;
         font-size: 26px;
       }
     }
@@ -410,11 +412,15 @@
 
 <script>
   const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
-  const ITEM_HEIGHT = 44;
-  const VISIBLE_CENTER_TOP = 70;
-  const BASE_CENTER_INDEX = 20;
   const serialDigits = [0, 0, 0, 0, 0];
   let serialValidationTimer = null;
+
+  function getWheelMetrics() {
+    const mobile = window.innerWidth <= 700;
+    return mobile
+      ? { itemHeight: 40, wheelHeight: 156, highlightHeight: 40, baseCenterIndex: 20 }
+      : { itemHeight: 44, wheelHeight: 180, highlightHeight: 44, baseCenterIndex: 20 };
+  }
 
   function setStatus(msg, color = "green") {
     const el = document.getElementById("status");
@@ -458,8 +464,10 @@
   }
 
   function getWheelTranslateForDigit(digit) {
-    const targetIndex = BASE_CENTER_INDEX + digit;
-    return VISIBLE_CENTER_TOP - (targetIndex * ITEM_HEIGHT);
+    const m = getWheelMetrics();
+    const visibleCenterTop = (m.wheelHeight - m.highlightHeight) / 2;
+    const targetIndex = m.baseCenterIndex + digit;
+    return visibleCenterTop - (targetIndex * m.itemHeight);
   }
 
   function setWheelPosition(index, animate = true) {
@@ -478,7 +486,8 @@
   }
 
   function normalizeDeltaToSteps(deltaY) {
-    return Math.round(deltaY / ITEM_HEIGHT);
+    const m = getWheelMetrics();
+    return Math.round(deltaY / m.itemHeight);
   }
 
   function initSerialWheels() {
@@ -506,7 +515,7 @@
       function move(y) {
         if (!dragging) return;
 
-        const delta = (y - startY) * 0.55;
+        const delta = y - startY;
         dragOffset = delta;
 
         if (Math.abs(delta) > 3) moved = true;
@@ -822,6 +831,12 @@
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Order";
       unlockPageScroll();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    for (let i = 0; i < serialDigits.length; i++) {
+      setWheelPosition(i, false);
     }
   });
 
