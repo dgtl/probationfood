@@ -20,6 +20,11 @@
         #d89024;
     }
 
+    body.picker-lock {
+      overflow: hidden;
+      touch-action: none;
+    }
+
     .container {
       max-width: 900px;
       margin: auto;
@@ -117,9 +122,9 @@
     }
 
     .picker-wheel {
-      flex: 0 0 56px;
-      width: 56px;
-      height: 164px;
+      flex: 0 0 64px;
+      width: 64px;
+      height: 180px;
       position: relative;
       border-radius: 14px;
       background: linear-gradient(180deg, #f8f8f8, #d7d7d7);
@@ -130,6 +135,7 @@
         0 4px 12px rgba(0,0,0,.18);
       overflow: hidden;
       touch-action: pan-y;
+      overscroll-behavior: contain;
       user-select: none;
       -webkit-user-select: none;
     }
@@ -158,14 +164,14 @@
     .picker-highlight {
       position: absolute;
       left: 0;
-      top: 62px;
+      top: 70px;
       width: 100%;
-      height: 40px;
+      height: 44px;
       z-index: 6;
       pointer-events: none;
-      background: rgba(255,255,255,.38);
-      border-top: 2px solid rgba(90,22,15,.55);
-      border-bottom: 2px solid rgba(90,22,15,.55);
+      background: rgba(255,255,255,.55);
+      border-top: 3px solid #8b1e14;
+      border-bottom: 3px solid #8b1e14;
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.9),
         inset 0 -1px 0 rgba(255,255,255,.9),
@@ -182,26 +188,26 @@
     }
 
     .picker-item {
-      height: 40px;
-      line-height: 40px;
+      height: 44px;
+      line-height: 44px;
       text-align: center;
-      font-size: 30px;
-      font-weight: 700;
+      font-size: 34px;
+      font-weight: 800;
       color: #9a9a9a;
-      opacity: .38;
+      opacity: .35;
       font-variant-numeric: tabular-nums;
       transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
     }
 
     .picker-item.near {
-      color: #6f6f6f;
-      opacity: .62;
+      color: #555;
+      opacity: .65;
     }
 
     .picker-item.selected {
-      color: #111;
+      color: #000;
       opacity: 1;
-      transform: scale(1.04);
+      transform: scale(1.15);
     }
 
     button {
@@ -291,7 +297,7 @@
 
     <div class="field">
       <div class="serial-label-top">Serial Number</div>
-      <label class="main">Set your serial №</label>
+      <label class="main">Swipe each wheel to align your 5-digit serial</label>
 
       <div id="serialContainer" class="picker-wrap">
         <div class="picker-wheel" data-index="0">
@@ -341,7 +347,6 @@
           <label class="item"><input type="radio" name="burritoChoice" value="Beef & Green Chile Burrito">Beef & Green Chile Burrito</label>
           <label class="item"><input type="radio" name="burritoChoice" value="Chicken & Green Chile Burrito">Chicken & Green Chile Burrito</label>
           <label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno Burrito">Chile Relleno Burrito</label>
-		  <label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno Burrito">Bean & Rice Burrito</label>
         </div>
       </div>
 
@@ -405,8 +410,8 @@
 
 <script>
   const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
-  const ITEM_HEIGHT = 40;
-  const VISIBLE_CENTER_TOP = 62;
+  const ITEM_HEIGHT = 44;
+  const VISIBLE_CENTER_TOP = 70;
   const serialDigits = [0, 0, 0, 0, 0];
   let serialValidationTimer = null;
 
@@ -420,6 +425,14 @@
     document.querySelectorAll('input[name="' + name + '"]').forEach(el => {
       el.checked = false;
     });
+  }
+
+  function lockPageScroll() {
+    document.body.classList.add("picker-lock");
+  }
+
+  function unlockPageScroll() {
+    document.body.classList.remove("picker-lock");
   }
 
   function buildPickerList(current) {
@@ -484,11 +497,12 @@
         currentTransform = readTranslateY();
         startTransform = currentTransform;
         list.style.transition = "none";
+        lockPageScroll();
       }
 
       function move(y) {
         if (!dragging) return;
-        const delta = y - startY;
+        const delta = (y - startY) * 0.6;
         if (Math.abs(delta) > 2) moved = true;
         currentTransform = startTransform + delta;
         list.style.transform = `translateY(${currentTransform}px)`;
@@ -498,19 +512,26 @@
         if (!dragging) return;
         dragging = false;
 
-        let nearest = Math.round((VISIBLE_CENTER_TOP - currentTransform) / ITEM_HEIGHT);
-        if (nearest < 10) nearest = 10;
-        if (nearest > 39) nearest = 39;
+        let rawIndex = (VISIBLE_CENTER_TOP - currentTransform) / ITEM_HEIGHT;
+        let nearest = Math.round(rawIndex);
+        nearest = Math.max(12, Math.min(37, nearest));
 
         const digit = ((nearest % 10) + 10) % 10;
         serialDigits[index] = digit;
+
         setWheelPosition(index, true);
         scheduleSerialValidation();
+        unlockPageScroll();
       }
 
       wheel.addEventListener("touchstart", (e) => begin(e.touches[0].clientY), { passive: true });
       wheel.addEventListener("touchmove", (e) => move(e.touches[0].clientY), { passive: true });
       wheel.addEventListener("touchend", end, { passive: true });
+
+      wheel.addEventListener("touchcancel", () => {
+        dragging = false;
+        unlockPageScroll();
+      }, { passive: true });
 
       wheel.addEventListener("mousedown", (e) => {
         e.preventDefault();
@@ -519,6 +540,13 @@
 
       window.addEventListener("mousemove", (e) => move(e.clientY));
       window.addEventListener("mouseup", end);
+
+      window.addEventListener("mouseleave", () => {
+        if (dragging) {
+          dragging = false;
+          unlockPageScroll();
+        }
+      });
 
       wheel.addEventListener("wheel", (e) => {
         e.preventDefault();
@@ -784,6 +812,7 @@
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Order";
+      unlockPageScroll();
     }
   });
 
