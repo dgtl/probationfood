@@ -415,6 +415,10 @@
   const serialDigits = [0, 0, 0, 0, 0];
   let serialValidationTimer = null;
 
+  const formChannel = typeof BroadcastChannel !== "undefined"
+    ? new BroadcastChannel("ramonas-orders")
+    : null;
+
   function getWheelMetrics() {
     const mobile = window.innerWidth <= 700;
     return mobile
@@ -648,6 +652,8 @@
         return;
       }
 
+      const currentValue = select.value;
+
       select.innerHTML = '<option value="">Select Name</option>';
 
       data.names.forEach(name => {
@@ -657,9 +663,15 @@
         select.appendChild(option);
       });
 
+      if (currentValue && data.names.includes(currentValue)) {
+        select.value = currentValue;
+      }
+
       if (!data.names.length) {
         select.innerHTML = '<option value="">No names found</option>';
       }
+
+      validateSerialLive();
     };
 
     const oldScript = document.getElementById("jsonpNames");
@@ -724,6 +736,22 @@
 
   document.getElementById("extraTaco").addEventListener("change", updateExtra);
   document.getElementById("memberName").addEventListener("change", validateSerialLive);
+
+  if (formChannel) {
+    formChannel.onmessage = (event) => {
+      if (event.data === "refreshNames") {
+        loadNames();
+      }
+    };
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      loadNames();
+    }
+  });
+
+  setInterval(loadNames, 5000);
 
   document.getElementById("mealForm").addEventListener("submit", async function(e) {
     e.preventDefault();
@@ -824,6 +852,10 @@
       resetSerialWheels();
       loadNames();
       setSubmitReady(false);
+
+      if (formChannel) {
+        formChannel.postMessage("refreshNames");
+      }
 
     } catch (err) {
       setStatus("Submit failed: " + err.message, "red");
