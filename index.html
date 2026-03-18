@@ -412,6 +412,7 @@
   const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
   const ITEM_HEIGHT = 44;
   const VISIBLE_CENTER_TOP = 70;
+  const BASE_CENTER_INDEX = 20;
   const serialDigits = [0, 0, 0, 0, 0];
   let serialValidationTimer = null;
 
@@ -456,20 +457,28 @@
     return html;
   }
 
+  function getWheelTranslateForDigit(digit) {
+    const targetIndex = BASE_CENTER_INDEX + digit;
+    return VISIBLE_CENTER_TOP - (targetIndex * ITEM_HEIGHT);
+  }
+
   function setWheelPosition(index, animate = true) {
     const wheel = document.querySelectorAll(".picker-wheel")[index];
     const list = wheel.querySelector(".picker-list");
-    const targetIndex = 20 + serialDigits[index];
-    const y = VISIBLE_CENTER_TOP - (targetIndex * ITEM_HEIGHT);
+    const y = getWheelTranslateForDigit(serialDigits[index]);
 
     list.innerHTML = buildPickerList(serialDigits[index]);
-    list.style.transition = animate ? "transform 180ms cubic-bezier(.22,.8,.32,1)" : "none";
+    list.style.transition = animate ? "transform 220ms cubic-bezier(.18,.82,.25,1)" : "none";
     list.style.transform = `translateY(${y}px)`;
   }
 
   function scheduleSerialValidation() {
     clearTimeout(serialValidationTimer);
     serialValidationTimer = setTimeout(validateSerialLive, 180);
+  }
+
+  function normalizeDeltaToSteps(deltaY) {
+    return Math.round(deltaY / ITEM_HEIGHT);
   }
 
   function initSerialWheels() {
@@ -479,45 +488,43 @@
       setWheelPosition(index, false);
 
       let startY = 0;
-      let startTransform = 0;
-      let currentTransform = 0;
       let dragging = false;
       let moved = false;
-
-      function readTranslateY() {
-        const style = window.getComputedStyle(list);
-        const matrix = new DOMMatrixReadOnly(style.transform);
-        return matrix.m42;
-      }
+      let startDigit = 0;
+      let dragOffset = 0;
 
       function begin(y) {
         dragging = true;
         moved = false;
         startY = y;
-        currentTransform = readTranslateY();
-        startTransform = currentTransform;
+        startDigit = serialDigits[index];
+        dragOffset = 0;
         list.style.transition = "none";
         lockPageScroll();
       }
 
       function move(y) {
         if (!dragging) return;
-        const delta = (y - startY) * 0.6;
-        if (Math.abs(delta) > 2) moved = true;
-        currentTransform = startTransform + delta;
-        list.style.transform = `translateY(${currentTransform}px)`;
+
+        const delta = (y - startY) * 0.55;
+        dragOffset = delta;
+
+        if (Math.abs(delta) > 3) moved = true;
+
+        const baseY = getWheelTranslateForDigit(startDigit);
+        list.style.transform = `translateY(${baseY + dragOffset}px)`;
       }
 
       function end() {
         if (!dragging) return;
         dragging = false;
 
-        let rawIndex = (VISIBLE_CENTER_TOP - currentTransform) / ITEM_HEIGHT;
-        let nearest = Math.round(rawIndex);
-        nearest = Math.max(12, Math.min(37, nearest));
+        const steps = normalizeDeltaToSteps(-dragOffset);
+        let newDigit = (startDigit + steps) % 10;
+        if (newDigit < 0) newDigit += 10;
 
-        const digit = ((nearest % 10) + 10) % 10;
-        serialDigits[index] = digit;
+        serialDigits[index] = newDigit;
+        dragOffset = 0;
 
         setWheelPosition(index, true);
         scheduleSerialValidation();
@@ -530,6 +537,7 @@
 
       wheel.addEventListener("touchcancel", () => {
         dragging = false;
+        setWheelPosition(index, true);
         unlockPageScroll();
       }, { passive: true });
 
@@ -544,6 +552,7 @@
       window.addEventListener("mouseleave", () => {
         if (dragging) {
           dragging = false;
+          setWheelPosition(index, true);
           unlockPageScroll();
         }
       });
