@@ -105,6 +105,49 @@
       color: #5a160f;
     }
 
+    .serial-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      min-height: 28px;
+    }
+
+    .serial-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(0,0,0,.05);
+      color: #666;
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity 140ms ease, transform 140ms ease, background-color 140ms ease, color 140ms ease;
+    }
+
+    .serial-status-pill.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .serial-status-pill.valid {
+      background: rgba(31,139,61,.12);
+      color: #176a2f;
+    }
+
+    .serial-status-pill.invalid {
+      background: rgba(176,0,32,.10);
+      color: #9a0020;
+    }
+
+    .status-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
     .picker-wrap {
       display: flex;
       justify-content: center;
@@ -138,6 +181,19 @@
       overscroll-behavior: contain;
       user-select: none;
       -webkit-user-select: none;
+    }
+
+    .picker-wheel.shake {
+      animation: wheel-shake 260ms ease;
+    }
+
+    @keyframes wheel-shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-3px); }
+      40% { transform: translateX(3px); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
+      100% { transform: translateX(0); }
     }
 
     .picker-wheel::before,
@@ -176,6 +232,27 @@
         inset 0 1px 0 rgba(255,255,255,.9),
         inset 0 -1px 0 rgba(255,255,255,.9),
         0 0 0 1px rgba(90,22,15,.08);
+      transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+    }
+
+    .picker-highlight.valid {
+      border-top-color: #1f8b3d;
+      border-bottom-color: #1f8b3d;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -1px 0 rgba(255,255,255,.9),
+        0 0 0 1px rgba(31,139,61,.20);
+      background: rgba(31,139,61,.10);
+    }
+
+    .picker-highlight.invalid {
+      border-top-color: #b00020;
+      border-bottom-color: #b00020;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -1px 0 rgba(255,255,255,.9),
+        0 0 0 1px rgba(176,0,32,.18);
+      background: rgba(176,0,32,.08);
     }
 
     .picker-list {
@@ -217,7 +294,7 @@
       font-weight: bold;
       margin-top: 15px;
       cursor: pointer;
-      transition: background-color 160ms ease, transform 120ms ease;
+      transition: background-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
     }
 
     button:hover {
@@ -231,6 +308,7 @@
 
     button.valid-ready {
       background: #1f8b3d !important;
+      box-shadow: 0 0 0 2px rgba(31,139,61,.22);
     }
 
     .hidden {
@@ -321,6 +399,13 @@
         <div class="picker-wheel" data-index="4">
           <div class="picker-highlight"></div>
           <div class="picker-list"></div>
+        </div>
+      </div>
+
+      <div class="serial-status-row">
+        <div id="serialStatusPill" class="serial-status-pill">
+          <span id="serialStatusIcon" class="status-icon">✓</span>
+          <span id="serialStatusText">Serial matched</span>
         </div>
       </div>
     </div>
@@ -414,6 +499,7 @@
   const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
   const serialDigits = [0, 0, 0, 0, 0];
   let serialValidationTimer = null;
+  let validationToken = 0;
 
   const formChannel = typeof BroadcastChannel !== "undefined"
     ? new BroadcastChannel("ramonas-orders")
@@ -492,6 +578,47 @@
   function normalizeDeltaToSteps(deltaY) {
     const m = getWheelMetrics();
     return Math.round(deltaY / m.itemHeight);
+  }
+
+  function showSerialStatus(type) {
+    const pill = document.getElementById("serialStatusPill");
+    const icon = document.getElementById("serialStatusIcon");
+    const text = document.getElementById("serialStatusText");
+    const highlights = document.querySelectorAll(".picker-highlight");
+
+    pill.classList.remove("valid", "invalid", "show");
+    highlights.forEach(h => h.classList.remove("valid", "invalid"));
+
+    if (type === "valid") {
+      icon.textContent = "✓";
+      text.textContent = "Serial matched";
+      pill.classList.add("valid", "show");
+      highlights.forEach(h => h.classList.add("valid"));
+      return;
+    }
+
+    if (type === "invalid") {
+      icon.textContent = "✕";
+      text.textContent = "Serial does not match";
+      pill.classList.add("invalid", "show");
+      highlights.forEach(h => h.classList.add("invalid"));
+      return;
+    }
+  }
+
+  function clearSerialStatus() {
+    const pill = document.getElementById("serialStatusPill");
+    const highlights = document.querySelectorAll(".picker-highlight");
+    pill.classList.remove("valid", "invalid", "show");
+    highlights.forEach(h => h.classList.remove("valid", "invalid"));
+  }
+
+  function shakeWheels() {
+    document.querySelectorAll(".picker-wheel").forEach(w => {
+      w.classList.remove("shake");
+      void w.offsetWidth;
+      w.classList.add("shake");
+    });
   }
 
   function initSerialWheels() {
@@ -601,6 +728,7 @@
       serialDigits[i] = 0;
       setWheelPosition(i, false);
     }
+    clearSerialStatus();
   }
 
   function setSubmitReady(isReady) {
@@ -613,16 +741,24 @@
     const serialNumber = getSerialNumber();
 
     setSubmitReady(false);
+    clearSerialStatus();
 
     if (!memberName || !/^\d{5}$/.test(serialNumber)) {
       return;
     }
 
+    const currentToken = ++validationToken;
+
     window.validateSerialCallback = function(data) {
+      if (currentToken !== validationToken) return;
+
       if (data && data.ok && data.valid) {
         setSubmitReady(true);
+        showSerialStatus("valid");
       } else {
         setSubmitReady(false);
+        showSerialStatus("invalid");
+        shakeWheels();
       }
     };
 
@@ -773,6 +909,8 @@
 
     if (!/^\d{5}$/.test(serialNumber)) {
       setStatus("Please align all 5 serial digits.", "red");
+      showSerialStatus("invalid");
+      shakeWheels();
       return;
     }
 
@@ -840,10 +978,13 @@
 
       if (!json.ok) {
         setStatus(json.error || "Submission failed.", "red");
+        showSerialStatus("invalid");
+        shakeWheels();
         return;
       }
 
       setStatus(json.message || "Order submitted!");
+      showSerialStatus("valid");
 
       document.getElementById("mealForm").reset();
       document.getElementById("burritoSection").classList.add("hidden");
@@ -859,6 +1000,8 @@
 
     } catch (err) {
       setStatus("Submit failed: " + err.message, "red");
+      showSerialStatus("invalid");
+      shakeWheels();
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit Order";
