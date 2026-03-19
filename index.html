@@ -6,7 +6,9 @@
   <title>Ramona's Meal Order Form</title>
 
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -32,9 +34,24 @@
       box-shadow: 0 8px 30px rgba(0,0,0,.3);
     }
 
-    h1 { margin: 0 0 8px 0; font-size: 34px; color: #5a160f; }
-    .intro { margin-bottom: 20px; font-size: 16px; color: #333; }
-    .section { margin-top: 25px; font-weight: bold; font-size: 18px; color: #5a160f; }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 34px;
+      color: #5a160f;
+    }
+
+    .intro {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .section {
+      margin-top: 25px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #5a160f;
+    }
 
     .field {
       margin-top: 12px;
@@ -50,7 +67,8 @@
       font-weight: bold;
     }
 
-    select, button {
+    select,
+    button {
       width: 100%;
       padding: 12px;
       border-radius: 10px;
@@ -58,7 +76,8 @@
       font-size: 15px;
     }
 
-    .radio-group, .checkbox-group {
+    .radio-group,
+    .checkbox-group {
       display: grid;
       gap: 8px;
     }
@@ -72,198 +91,969 @@
       border-radius: 8px;
       border: 1px solid #eee;
       cursor: pointer;
+      font-weight: normal;
+    }
+
+    .item input {
+      width: auto;
+      margin: 0;
+    }
+
+    .serial-label-top {
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #5a160f;
+    }
+
+    .serial-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      min-height: 28px;
     }
 
     .serial-status-pill {
-      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 6px 10px;
       border-radius: 999px;
-      font-weight: bold;
-      display: none;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(0,0,0,.05);
+      color: #666;
+      opacity: 0;
+      transform: translateY(2px);
+      transition: opacity 140ms ease, transform 140ms ease, background-color 140ms ease, color 140ms ease;
     }
 
-    .serial-status-pill.valid { background: #d4f5dd; color: #1f8b3d; display:block; }
-    .serial-status-pill.invalid { background: #f9d6d9; color: #b00020; display:block; }
+    .serial-status-pill.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .serial-status-pill.valid {
+      background: rgba(31,139,61,.12);
+      color: #176a2f;
+    }
+
+    .serial-status-pill.invalid {
+      background: rgba(176,0,32,.10);
+      color: #9a0020;
+    }
+
+    .status-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
 
     .picker-wrap {
       display: flex;
-      gap: 8px;
       justify-content: center;
+      gap: 8px;
+      flex-wrap: nowrap;
       overflow-x: auto;
+      overflow-y: hidden;
+      padding: 4px 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .picker-wrap::-webkit-scrollbar {
+      display: none;
     }
 
     .picker-wheel {
+      flex: 0 0 64px;
       width: 64px;
       height: 180px;
       position: relative;
       border-radius: 14px;
-      background: #eee;
+      background: linear-gradient(180deg, #f8f8f8, #d7d7d7);
+      border: 1px solid #aaa;
+      box-shadow:
+        inset 0 2px 6px rgba(255,255,255,.85),
+        inset 0 -2px 6px rgba(0,0,0,.12),
+        0 4px 12px rgba(0,0,0,.18);
       overflow: hidden;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .picker-wheel.shake {
+      animation: wheel-shake 260ms ease;
+    }
+
+    @keyframes wheel-shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-3px); }
+      40% { transform: translateX(3px); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
+      100% { transform: translateX(0); }
+    }
+
+    .picker-wheel::before,
+    .picker-wheel::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 42px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .picker-wheel::before {
+      top: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,0));
+    }
+
+    .picker-wheel::after {
+      bottom: 0;
+      background: linear-gradient(0deg, rgba(255,255,255,.96), rgba(255,255,255,0));
     }
 
     .picker-highlight {
       position: absolute;
+      left: 0;
       top: 68px;
-      height: 44px;
       width: 100%;
+      height: 44px;
+      z-index: 6;
+      pointer-events: none;
+      background: rgba(255,255,255,.55);
       border-top: 3px solid #8b1e14;
       border-bottom: 3px solid #8b1e14;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -1px 0 rgba(255,255,255,.9),
+        0 0 0 1px rgba(90,22,15,.08);
+      transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+    }
+
+    .picker-highlight.valid {
+      border-top-color: #1f8b3d;
+      border-bottom-color: #1f8b3d;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -1px 0 rgba(255,255,255,.9),
+        0 0 0 1px rgba(31,139,61,.20);
+      background: rgba(31,139,61,.10);
+    }
+
+    .picker-highlight.invalid {
+      border-top-color: #b00020;
+      border-bottom-color: #b00020;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        inset 0 -1px 0 rgba(255,255,255,.9),
+        0 0 0 1px rgba(176,0,32,.18);
+      background: rgba(176,0,32,.08);
+    }
+
+    .picker-list {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      will-change: transform;
+      z-index: 1;
+    }
+
+    .picker-item {
+      height: 44px;
+      line-height: 44px;
+      text-align: center;
+      font-size: 34px;
+      font-weight: 800;
+      color: #9a9a9a;
+      opacity: .35;
+      font-variant-numeric: tabular-nums;
+      transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
+    }
+
+    .picker-item.near {
+      color: #555;
+      opacity: .65;
+    }
+
+    .picker-item.selected {
+      color: #000;
+      opacity: 1;
+      transform: scale(1.15);
     }
 
     button {
       background: #8b1e14;
       color: white;
       border: none;
+      font-weight: bold;
       margin-top: 15px;
       cursor: pointer;
+      transition: background-color 160ms ease, transform 120ms ease, box-shadow 160ms ease;
+    }
+
+    button:hover {
+      background: #74180f;
+    }
+
+    button:disabled {
+      opacity: .7;
+      cursor: not-allowed;
     }
 
     button.valid-ready {
       background: #1f8b3d !important;
+      box-shadow: 0 0 0 2px rgba(31,139,61,.22);
     }
 
-    #status { margin-top: 10px; font-weight: bold; }
+    .hidden {
+      display: none;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 20px;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .picker-wrap {
+        gap: 6px;
+        justify-content: flex-start;
+      }
+
+      .picker-wheel {
+        flex: 0 0 52px;
+        width: 52px;
+        height: 156px;
+      }
+
+      .picker-highlight {
+        top: 58px;
+        height: 40px;
+        border-top: 2px solid rgba(90,22,15,.65);
+        border-bottom: 2px solid rgba(90,22,15,.65);
+      }
+
+      .picker-item {
+        height: 40px;
+        line-height: 40px;
+        font-size: 26px;
+      }
+    }
   </style>
 </head>
-
 <body>
+
 <div class="container">
+  <h1>Ramona's Meal Order Form</h1>
+  <p class="intro">Tell Sgt Dear your food order below.</p>
 
-<h1>Ramona's Meal Order Form</h1>
-<p class="intro">Tell Sgt Dear your food order below.</p>
+  <form id="mealForm">
+    <div class="field">
+      <div style="margin-bottom:6px;font-weight:bold;">Who's eating this order?</div>
+      <label class="main" for="memberName">Your Name</label>
+      <select id="memberName" required>
+        <option value="">Loading names...</option>
+      </select>
+    </div>
 
-<form id="mealForm">
+    <div class="field">
+      <div class="serial-label-top">Serial Number</div>
+      <label class="main">Set your serial №</label>
 
-<div class="field">
-  <div style="margin-bottom:6px;font-weight:bold;">Who's eating this order?</div>
-  <label class="main">Your Name</label>
-  <select id="memberName">
-    <option>Loading...</option>
-  </select>
-</div>
+      <div id="serialContainer" class="picker-wrap">
+        <div class="picker-wheel" data-index="0">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
+        </div>
+        <div class="picker-wheel" data-index="1">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
+        </div>
+        <div class="picker-wheel" data-index="2">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
+        </div>
+        <div class="picker-wheel" data-index="3">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
+        </div>
+        <div class="picker-wheel" data-index="4">
+          <div class="picker-highlight"></div>
+          <div class="picker-list"></div>
+        </div>
+      </div>
 
-<div class="field">
-  <div class="serial-label-top">Serial Number</div>
-  <div class="picker-wrap" id="serialContainer"></div>
+      <div class="serial-status-row">
+        <div id="serialStatusPill" class="serial-status-pill">
+          <span id="serialStatusIcon" class="status-icon">✓</span>
+          <span id="serialStatusText">You're Verified</span>
+        </div>
+      </div>
+    </div>
 
-  <div id="serialStatusPill" class="serial-status-pill">
-    <span id="serialStatusText">Serial matched</span>
-  </div>
-</div>
+    <div class="section">Meal Selection</div>
 
-<button type="submit" id="submitBtn">Submit Order</button>
+    <div class="field">
+      <div class="radio-group">
+        <label class="item">
+          <input type="radio" name="mealType" value="Burrito">
+          Burrito
+        </label>
 
-<!-- 🔥 NEW LINK ADDED HERE -->
-<div style="text-align:center; margin-top:12px;">
-  <a
-    href="https://dgtl.github.io/probationfood/viewer"
-    target="_blank"
-    rel="noopener noreferrer"
-    style="color:#8b1e14; font-weight:bold; text-decoration:none;"
-  >
-    Click to see what others ordered
-  </a>
-</div>
+        <label class="item">
+          <input type="radio" name="mealType" value="3 Tacos">
+          3 Tacos
+        </label>
+      </div>
+    </div>
 
-</form>
+    <div id="burritoSection" class="hidden">
+      <div class="field">
+        <label class="main">Burrito Choice</label>
+        <div class="radio-group">
+          <label class="item"><input type="radio" name="burritoChoice" value="Beef & Red Chile Burrito">Beef & Red Chile Burrito</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Beef & Green Chile Burrito">Beef & Green Chile Burrito</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Chicken & Green Chile Burrito">Chicken & Green Chile Burrito</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno Burrito">Chile Relleno Burrito</label>
+        </div>
+      </div>
 
-<div id="status"></div>
+      <div class="field">
+        <label class="main">Add-ons</label>
+        <div class="checkbox-group">
+          <label class="item"><input type="checkbox" id="addRice">Rice</label>
+          <label class="item"><input type="checkbox" id="addCheese">Cheese</label>
+          <label class="item"><input type="checkbox" id="addGreenOnion">Green Onion</label>
+          <label class="item"><input type="checkbox" id="addLettuce">Lettuce</label>
+        </div>
+      </div>
 
+      <div class="field">
+        <label class="item">
+          <input type="checkbox" id="extraTaco">
+          Add up to 1 taco
+        </label>
+      </div>
+
+      <div id="extraTacoSection" class="hidden">
+        <div class="field">
+          <label class="main">Extra Taco Type</label>
+          <div class="radio-group">
+            <label class="item"><input type="radio" name="extraTacoType" value="Picadillo Taco">Picadillo Taco</label>
+            <label class="item"><input type="radio" name="extraTacoType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="item">
+            <input type="checkbox" id="extraTacoHotSauce">
+            Add Hot Sauce
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="tacoSection" class="hidden">
+      <div class="field">
+        <label class="main">3 Taco Order Type</label>
+        <div class="radio-group">
+          <label class="item"><input type="radio" name="tacoPlateType" value="Picadillo Taco">Picadillo Taco</label>
+          <label class="item"><input type="radio" name="tacoPlateType" value="Chicken & Green Chile">Chicken & Green Chile</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="item">
+          <input type="checkbox" id="tacoPlateHotSauce">
+          Add Hot Sauce
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" id="submitBtn">Submit Order</button>
+  </form>
+
+  <div id="status"></div>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
+  const API = "https://script.google.com/macros/s/AKfycbw0m52ncEEPWRfIJ-BTuMpRTUVNBJ5kwR8cRHt5WvXu9wv398-K--jiXH892epTCf0ZIQ/exec";
+  const serialDigits = [0, 0, 0, 0, 0];
+  let serialValidationTimer = null;
+  let validationToken = 0;
+  let lastValidatedName = "";
+  let lastValidatedSerial = "";
+  let lastValidationWasValid = false;
 
-let lastValidatedName = "";
-let lastValidatedSerial = "";
-let lastValidationWasValid = false;
-let validationToken = 0;
+  const formChannel = typeof BroadcastChannel !== "undefined"
+    ? new BroadcastChannel("ramonas-orders")
+    : null;
 
-function setSubmitReady(val){
-  document.getElementById("submitBtn").classList.toggle("valid-ready", val);
-}
-
-function showSerialStatus(valid){
-  const pill = document.getElementById("serialStatusPill");
-  pill.className = "serial-status-pill " + (valid ? "valid":"invalid");
-  document.getElementById("serialStatusText").textContent =
-    valid ? "Serial matched" : "Serial does not match";
-}
-
-function clearSerialStatus(){
-  document.getElementById("serialStatusPill").style.display="none";
-}
-
-function validateSerialLive(force=false){
-  const name = document.getElementById("memberName").value;
-  const serial = "12345"; // simplified placeholder (your dial logic stays)
-
-  if(!name){ return; }
-
-  if(!force && name===lastValidatedName && serial===lastValidatedSerial){
-    if(lastValidationWasValid){
-      setSubmitReady(true);
-      showSerialStatus(true);
-    }
-    return;
+  function getWheelMetrics() {
+    const mobile = window.innerWidth <= 700;
+    return mobile
+      ? { itemHeight: 40, wheelHeight: 156, highlightHeight: 40, baseCenterIndex: 20 }
+      : { itemHeight: 44, wheelHeight: 180, highlightHeight: 44, baseCenterIndex: 20 };
   }
 
-  const token = ++validationToken;
+  function setStatus(msg, color = "green") {
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.style.color = color;
+  }
 
-  window.cb = function(data){
-    if(token!==validationToken) return;
-
-    lastValidatedName=name;
-    lastValidatedSerial=serial;
-
-    if(data.valid){
-      lastValidationWasValid=true;
-      setSubmitReady(true);
-      showSerialStatus(true);
-    }else{
-      lastValidationWasValid=false;
-      setSubmitReady(false);
-      showSerialStatus(false);
-    }
-  };
-
-  const s=document.createElement("script");
-  s.src=API+"?action=validate&name="+name+"&serial="+serial+"&callback=cb&_="+Date.now();
-  document.body.appendChild(s);
-}
-
-function loadNames(){
-  window.nameCB = function(data){
-    const select=document.getElementById("memberName");
-    const prev=select.value;
-
-    select.innerHTML="<option>Select Name</option>";
-
-    data.names.forEach(n=>{
-      let o=document.createElement("option");
-      o.value=n;
-      o.textContent=n;
-      select.appendChild(o);
+  function clearRadioGroup(name) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(el => {
+      el.checked = false;
     });
+  }
 
-    if(prev && data.names.includes(prev)){
-      select.value=prev;
-    }else{
-      clearSerialStatus();
-      setSubmitReady(false);
+  function lockPageScroll() {
+    document.body.classList.add("picker-lock");
+  }
+
+  function unlockPageScroll() {
+    document.body.classList.remove("picker-lock");
+  }
+
+  function buildPickerList(current) {
+    let html = "";
+    for (let block = 0; block < 5; block++) {
+      for (let d = 0; d <= 9; d++) {
+        let cls = "picker-item";
+
+        if (block === 2 && d === current) {
+          cls += " selected";
+        } else if (
+          block === 2 &&
+          (d === (current + 9) % 10 || d === (current + 1) % 10)
+        ) {
+          cls += " near";
+        }
+
+        html += `<div class="${cls}">${d}</div>`;
+      }
     }
-  };
+    return html;
+  }
 
-  const s=document.createElement("script");
-  s.src=API+"?action=getNames&callback=nameCB&_="+Date.now();
-  document.body.appendChild(s);
-}
+  function getWheelTranslateForDigit(digit) {
+    const m = getWheelMetrics();
+    const visibleCenterTop = (m.wheelHeight - m.highlightHeight) / 2;
+    const targetIndex = m.baseCenterIndex + digit;
+    return visibleCenterTop - (targetIndex * m.itemHeight);
+  }
 
-setInterval(loadNames,5000);
+  function setWheelPosition(index, animate = true) {
+    const wheel = document.querySelectorAll(".picker-wheel")[index];
+    const list = wheel.querySelector(".picker-list");
+    const y = getWheelTranslateForDigit(serialDigits[index]);
 
-document.getElementById("memberName").addEventListener("change",()=>validateSerialLive(true));
+    list.innerHTML = buildPickerList(serialDigits[index]);
+    list.style.transition = animate ? "transform 220ms cubic-bezier(.18,.82,.25,1)" : "none";
+    list.style.transform = `translateY(${y}px)`;
+  }
 
-loadNames();
+  function scheduleSerialValidation() {
+    clearTimeout(serialValidationTimer);
+    serialValidationTimer = setTimeout(() => validateSerialLive(true), 180);
+  }
+
+  function normalizeDeltaToSteps(deltaY) {
+    const m = getWheelMetrics();
+    return Math.round(deltaY / m.itemHeight);
+  }
+
+  function showSerialStatus(type) {
+    const pill = document.getElementById("serialStatusPill");
+    const icon = document.getElementById("serialStatusIcon");
+    const text = document.getElementById("serialStatusText");
+    const highlights = document.querySelectorAll(".picker-highlight");
+
+    pill.classList.remove("valid", "invalid", "show");
+    highlights.forEach(h => h.classList.remove("valid", "invalid"));
+
+    if (type === "valid") {
+      icon.textContent = "✓";
+      text.textContent = "You're Verified";
+      pill.classList.add("valid", "show");
+      highlights.forEach(h => h.classList.add("valid"));
+      return;
+    }
+
+    if (type === "invalid") {
+      icon.textContent = "✕";
+      text.textContent = "Serial does not match";
+      pill.classList.add("invalid", "show");
+      highlights.forEach(h => h.classList.add("invalid"));
+      return;
+    }
+  }
+
+  function clearSerialStatus() {
+    const pill = document.getElementById("serialStatusPill");
+    const highlights = document.querySelectorAll(".picker-highlight");
+    pill.classList.remove("valid", "invalid", "show");
+    highlights.forEach(h => h.classList.remove("valid", "invalid"));
+  }
+
+  function shakeWheels() {
+    document.querySelectorAll(".picker-wheel").forEach(w => {
+      w.classList.remove("shake");
+      void w.offsetWidth;
+      w.classList.add("shake");
+    });
+  }
+
+  function initSerialWheels() {
+    document.querySelectorAll(".picker-wheel").forEach((wheel, index) => {
+      const list = wheel.querySelector(".picker-list");
+      list.innerHTML = buildPickerList(serialDigits[index]);
+      setWheelPosition(index, false);
+
+      let startY = 0;
+      let dragging = false;
+      let moved = false;
+      let startDigit = 0;
+      let dragOffset = 0;
+
+      function begin(y) {
+        dragging = true;
+        moved = false;
+        startY = y;
+        startDigit = serialDigits[index];
+        dragOffset = 0;
+        list.style.transition = "none";
+        lockPageScroll();
+      }
+
+      function move(y) {
+        if (!dragging) return;
+
+        const delta = y - startY;
+        dragOffset = delta;
+
+        if (Math.abs(delta) > 3) moved = true;
+
+        const baseY = getWheelTranslateForDigit(startDigit);
+        list.style.transform = `translateY(${baseY + dragOffset}px)`;
+      }
+
+      function end() {
+        if (!dragging) return;
+        dragging = false;
+
+        const steps = normalizeDeltaToSteps(-dragOffset);
+        let newDigit = (startDigit + steps) % 10;
+        if (newDigit < 0) newDigit += 10;
+
+        serialDigits[index] = newDigit;
+        dragOffset = 0;
+
+        setWheelPosition(index, true);
+        scheduleSerialValidation();
+        unlockPageScroll();
+      }
+
+      wheel.addEventListener("touchstart", (e) => begin(e.touches[0].clientY), { passive: true });
+      wheel.addEventListener("touchmove", (e) => move(e.touches[0].clientY), { passive: true });
+      wheel.addEventListener("touchend", end, { passive: true });
+
+      wheel.addEventListener("touchcancel", () => {
+        dragging = false;
+        setWheelPosition(index, true);
+        unlockPageScroll();
+      }, { passive: true });
+
+      wheel.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        begin(e.clientY);
+      });
+
+      window.addEventListener("mousemove", (e) => move(e.clientY));
+      window.addEventListener("mouseup", end);
+
+      window.addEventListener("mouseleave", () => {
+        if (dragging) {
+          dragging = false;
+          setWheelPosition(index, true);
+          unlockPageScroll();
+        }
+      });
+
+      wheel.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        serialDigits[index] = (serialDigits[index] + (e.deltaY > 0 ? 1 : 9)) % 10;
+        setWheelPosition(index, true);
+        scheduleSerialValidation();
+      }, { passive: false });
+
+      wheel.addEventListener("click", (e) => {
+        if (moved) return;
+        const rect = wheel.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        if (y < rect.height / 2) {
+          serialDigits[index] = (serialDigits[index] + 9) % 10;
+        } else {
+          serialDigits[index] = (serialDigits[index] + 1) % 10;
+        }
+        setWheelPosition(index, true);
+        scheduleSerialValidation();
+      });
+    });
+  }
+
+  function getSerialNumber() {
+    return serialDigits.join("");
+  }
+
+  function resetSerialWheels() {
+    for (let i = 0; i < serialDigits.length; i++) {
+      serialDigits[i] = 0;
+      setWheelPosition(i, false);
+    }
+    clearSerialStatus();
+  }
+
+  function setSubmitReady(isReady) {
+    const btn = document.getElementById("submitBtn");
+    btn.classList.toggle("valid-ready", !!isReady);
+  }
+
+  function validateSerialLive(force = false) {
+    const memberName = document.getElementById("memberName").value;
+    const serialNumber = getSerialNumber();
+
+    if (!memberName || !/^\d{5}$/.test(serialNumber)) {
+      lastValidatedName = memberName;
+      lastValidatedSerial = serialNumber;
+      lastValidationWasValid = false;
+      setSubmitReady(false);
+      clearSerialStatus();
+      return;
+    }
+
+    if (
+      !force &&
+      memberName === lastValidatedName &&
+      serialNumber === lastValidatedSerial
+    ) {
+      if (lastValidationWasValid) {
+        setSubmitReady(true);
+        showSerialStatus("valid");
+      } else {
+        setSubmitReady(false);
+        showSerialStatus("invalid");
+      }
+      return;
+    }
+
+    const currentToken = ++validationToken;
+
+    window.validateSerialCallback = function(data) {
+      if (currentToken !== validationToken) return;
+
+      lastValidatedName = memberName;
+      lastValidatedSerial = serialNumber;
+
+      if (data && data.ok && data.valid) {
+        lastValidationWasValid = true;
+        setSubmitReady(true);
+        showSerialStatus("valid");
+      } else {
+        lastValidationWasValid = false;
+        setSubmitReady(false);
+        showSerialStatus("invalid");
+      }
+    };
+
+    const oldScript = document.getElementById("jsonpValidate");
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.id = "jsonpValidate";
+    script.src =
+      API +
+      "?action=validateSerial" +
+      "&memberName=" + encodeURIComponent(memberName) +
+      "&serialNumber=" + encodeURIComponent(serialNumber) +
+      "&callback=validateSerialCallback" +
+      "&_=" + Date.now();
+
+    document.body.appendChild(script);
+  }
+
+  function loadNames() {
+    window.nameCallback = function(data) {
+      const select = document.getElementById("memberName");
+      const previousValue = select.value;
+
+      if (!data || !data.ok) {
+        setStatus("Name load failed: " + ((data && data.error) || "Unknown error"), "red");
+        select.innerHTML = '<option value="">Unable to load names</option>';
+        return;
+      }
+
+      select.innerHTML = '<option value="">Select Name</option>';
+
+      data.names.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+
+      let preserved = false;
+      if (previousValue && data.names.includes(previousValue)) {
+        select.value = previousValue;
+        preserved = true;
+      }
+
+      if (!data.names.length) {
+        select.innerHTML = '<option value="">No names found</option>';
+        preserved = false;
+      }
+
+      if (!preserved && previousValue) {
+        lastValidatedName = "";
+        lastValidatedSerial = "";
+        lastValidationWasValid = false;
+        setSubmitReady(false);
+        clearSerialStatus();
+      } else if (!previousValue) {
+        setSubmitReady(false);
+        clearSerialStatus();
+      }
+    };
+
+    const oldScript = document.getElementById("jsonpNames");
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.id = "jsonpNames";
+    script.src = API + "?action=getNames&callback=nameCallback&_=" + Date.now();
+    script.onerror = function() {
+      setStatus("Name load failed: unable to reach Apps Script endpoint.", "red");
+      document.getElementById("memberName").innerHTML =
+        '<option value="">Unable to load names</option>';
+    };
+
+    document.body.appendChild(script);
+  }
+
+  function updateMeal() {
+    const type = document.querySelector('input[name="mealType"]:checked')?.value;
+    const burritoSection = document.getElementById("burritoSection");
+    const tacoSection = document.getElementById("tacoSection");
+
+    burritoSection.classList.add("hidden");
+    tacoSection.classList.add("hidden");
+
+    if (type === "Burrito") {
+      burritoSection.classList.remove("hidden");
+      clearRadioGroup("tacoPlateType");
+      document.getElementById("tacoPlateHotSauce").checked = false;
+    }
+
+    if (type === "3 Tacos") {
+      tacoSection.classList.remove("hidden");
+      clearRadioGroup("burritoChoice");
+      document.getElementById("addRice").checked = false;
+      document.getElementById("addCheese").checked = false;
+      document.getElementById("addGreenOnion").checked = false;
+      document.getElementById("addLettuce").checked = false;
+      document.getElementById("extraTaco").checked = false;
+      document.getElementById("extraTacoSection").classList.add("hidden");
+      clearRadioGroup("extraTacoType");
+      document.getElementById("extraTacoHotSauce").checked = false;
+    }
+  }
+
+  function updateExtra() {
+    const checked = document.getElementById("extraTaco").checked;
+    const section = document.getElementById("extraTacoSection");
+
+    if (checked) {
+      section.classList.remove("hidden");
+    } else {
+      section.classList.add("hidden");
+      clearRadioGroup("extraTacoType");
+      document.getElementById("extraTacoHotSauce").checked = false;
+    }
+  }
+
+  document.querySelectorAll('input[name="mealType"]').forEach(el => {
+    el.addEventListener("change", updateMeal);
+  });
+
+  document.getElementById("extraTaco").addEventListener("change", updateExtra);
+  document.getElementById("memberName").addEventListener("change", () => validateSerialLive(true));
+
+  if (formChannel) {
+    formChannel.onmessage = (event) => {
+      if (event.data === "refreshNames") {
+        loadNames();
+      }
+    };
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      loadNames();
+    }
+  });
+
+  setInterval(loadNames, 5000);
+
+  document.getElementById("mealForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("submitBtn");
+
+    const memberName = document.getElementById("memberName").value;
+    const serialNumber = getSerialNumber();
+    const mealType = document.querySelector('input[name="mealType"]:checked')?.value || "";
+    const burritoChoice = document.querySelector('input[name="burritoChoice"]:checked')?.value || "";
+    const extraTaco = document.getElementById("extraTaco").checked;
+    const extraTacoType = document.querySelector('input[name="extraTacoType"]:checked')?.value || "";
+    const tacoPlateType = document.querySelector('input[name="tacoPlateType"]:checked')?.value || "";
+
+    if (!memberName) {
+      setStatus("Please select who’s eating this order.", "red");
+      return;
+    }
+
+    if (!/^\d{5}$/.test(serialNumber)) {
+      setStatus("Please align all 5 serial digits.", "red");
+      showSerialStatus("invalid");
+      shakeWheels();
+      return;
+    }
+
+    if (!mealType) {
+      setStatus("Please choose Burrito or 3 Tacos.", "red");
+      return;
+    }
+
+    if (mealType === "Burrito" && !burritoChoice) {
+      setStatus("Please choose a burrito option.", "red");
+      return;
+    }
+
+    if (mealType === "3 Tacos" && !tacoPlateType) {
+      setStatus("Please choose a 3 taco order type.", "red");
+      return;
+    }
+
+    if (mealType === "Burrito" && extraTaco && !extraTacoType) {
+      setStatus("Please choose the extra taco type.", "red");
+      return;
+    }
+
+    const data = {
+      memberName: memberName,
+      serialNumber: serialNumber,
+      mealType: mealType,
+      burritoChoice: burritoChoice,
+      addRice: document.getElementById("addRice").checked,
+      addCheese: document.getElementById("addCheese").checked,
+      addGreenOnion: document.getElementById("addGreenOnion").checked,
+      addLettuce: document.getElementById("addLettuce").checked,
+      extraTaco: extraTaco,
+      extraTacoType: extraTacoType,
+      extraTacoHotSauce: document.getElementById("extraTacoHotSauce").checked,
+      tacoPlateType: tacoPlateType,
+      tacoPlateHotSauce: document.getElementById("tacoPlateHotSauce").checked
+    };
+
+    try {
+      setStatus("Submitting...");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+
+      const res = await fetch(API, {
+        method: "POST",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          action: "submitOrder",
+          formData: data
+        })
+      });
+
+      const text = await res.text();
+
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        throw new Error("Invalid server response.");
+      }
+
+      if (!json.ok) {
+        setStatus(json.error || "Submission failed.", "red");
+        showSerialStatus("invalid");
+        shakeWheels();
+        return;
+      }
+
+      setStatus(json.message || "Order submitted!");
+
+      document.getElementById("mealForm").reset();
+      document.getElementById("burritoSection").classList.add("hidden");
+      document.getElementById("tacoSection").classList.add("hidden");
+      document.getElementById("extraTacoSection").classList.add("hidden");
+      resetSerialWheels();
+      loadNames();
+      setSubmitReady(false);
+      lastValidatedName = "";
+      lastValidatedSerial = "";
+      lastValidationWasValid = false;
+
+      if (formChannel) {
+        formChannel.postMessage("refreshNames");
+      }
+
+    } catch (err) {
+      setStatus("Submit failed: " + err.message, "red");
+      showSerialStatus("invalid");
+      shakeWheels();
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Order";
+      unlockPageScroll();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    for (let i = 0; i < serialDigits.length; i++) {
+      setWheelPosition(i, false);
+    }
+  });
+
+  initSerialWheels();
+  loadNames();
 </script>
 
 </body>
