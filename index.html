@@ -500,6 +500,9 @@
   const serialDigits = [0, 0, 0, 0, 0];
   let serialValidationTimer = null;
   let validationToken = 0;
+  let lastValidatedName = "";
+  let lastValidatedSerial = "";
+  let lastValidationWasValid = false;
 
   const formChannel = typeof BroadcastChannel !== "undefined"
     ? new BroadcastChannel("ramonas-orders")
@@ -572,7 +575,7 @@
 
   function scheduleSerialValidation() {
     clearTimeout(serialValidationTimer);
-    serialValidationTimer = setTimeout(validateSerialLive, 180);
+    serialValidationTimer = setTimeout(() => validateSerialLive(true), 180);
   }
 
   function normalizeDeltaToSteps(deltaY) {
@@ -736,14 +739,31 @@
     btn.classList.toggle("valid-ready", !!isReady);
   }
 
-  function validateSerialLive() {
+  function validateSerialLive(force = false) {
     const memberName = document.getElementById("memberName").value;
     const serialNumber = getSerialNumber();
 
-    setSubmitReady(false);
-    clearSerialStatus();
-
     if (!memberName || !/^\d{5}$/.test(serialNumber)) {
+      lastValidatedName = memberName;
+      lastValidatedSerial = serialNumber;
+      lastValidationWasValid = false;
+      setSubmitReady(false);
+      clearSerialStatus();
+      return;
+    }
+
+    if (
+      !force &&
+      memberName === lastValidatedName &&
+      serialNumber === lastValidatedSerial
+    ) {
+      if (lastValidationWasValid) {
+        setSubmitReady(true);
+        showSerialStatus("valid");
+      } else {
+        setSubmitReady(false);
+        showSerialStatus("invalid");
+      }
       return;
     }
 
@@ -752,13 +772,17 @@
     window.validateSerialCallback = function(data) {
       if (currentToken !== validationToken) return;
 
+      lastValidatedName = memberName;
+      lastValidatedSerial = serialNumber;
+
       if (data && data.ok && data.valid) {
+        lastValidationWasValid = true;
         setSubmitReady(true);
         showSerialStatus("valid");
       } else {
+        lastValidationWasValid = false;
         setSubmitReady(false);
         showSerialStatus("invalid");
-        shakeWheels();
       }
     };
 
@@ -781,14 +805,13 @@
   function loadNames() {
     window.nameCallback = function(data) {
       const select = document.getElementById("memberName");
+      const previousValue = select.value;
 
       if (!data || !data.ok) {
         setStatus("Name load failed: " + ((data && data.error) || "Unknown error"), "red");
         select.innerHTML = '<option value="">Unable to load names</option>';
         return;
       }
-
-      const currentValue = select.value;
 
       select.innerHTML = '<option value="">Select Name</option>';
 
@@ -799,15 +822,27 @@
         select.appendChild(option);
       });
 
-      if (currentValue && data.names.includes(currentValue)) {
-        select.value = currentValue;
+      let preserved = false;
+      if (previousValue && data.names.includes(previousValue)) {
+        select.value = previousValue;
+        preserved = true;
       }
 
       if (!data.names.length) {
         select.innerHTML = '<option value="">No names found</option>';
+        preserved = false;
       }
 
-      validateSerialLive();
+      if (!preserved && previousValue) {
+        lastValidatedName = "";
+        lastValidatedSerial = "";
+        lastValidationWasValid = false;
+        setSubmitReady(false);
+        clearSerialStatus();
+      } else if (!previousValue) {
+        setSubmitReady(false);
+        clearSerialStatus();
+      }
     };
 
     const oldScript = document.getElementById("jsonpNames");
@@ -871,7 +906,7 @@
   });
 
   document.getElementById("extraTaco").addEventListener("change", updateExtra);
-  document.getElementById("memberName").addEventListener("change", validateSerialLive);
+  document.getElementById("memberName").addEventListener("change", () => validateSerialLive(true));
 
   if (formChannel) {
     formChannel.onmessage = (event) => {
@@ -984,7 +1019,6 @@
       }
 
       setStatus(json.message || "Order submitted!");
-      showSerialStatus("valid");
 
       document.getElementById("mealForm").reset();
       document.getElementById("burritoSection").classList.add("hidden");
@@ -993,6 +1027,9 @@
       resetSerialWheels();
       loadNames();
       setSubmitReady(false);
+      lastValidatedName = "";
+      lastValidatedSerial = "";
+      lastValidationWasValid = false;
 
       if (formChannel) {
         formChannel.postMessage("refreshNames");
