@@ -187,7 +187,7 @@
         inset 0 -3px 10px rgba(0,0,0,.5),
         0 6px 20px rgba(0,0,0,.55),
         0 2px 4px rgba(0,0,0,.4);
-      overflow: visible;
+      overflow: hidden;
       touch-action: pan-y;
       overscroll-behavior: contain;
       user-select: none;
@@ -284,35 +284,33 @@
       position: relative;
     }
 
-    /* Left chamber notch */
+    /* Left chamber notch — fully inset */
     .picker-item::before {
       content: "";
       position: absolute;
-      left: -1px;
+      left: 2px;
       top: 50%;
       transform: translateY(-50%);
-      width: 10px;
-      height: 22px;
-      border-radius: 0 11px 11px 0;   /* right half-capsule */
-      background:
-        linear-gradient(90deg, rgba(0,0,0,.0) 0%, rgba(0,0,0,.55) 100%);
-      box-shadow: inset -2px 0 4px rgba(0,0,0,.5);
+      width: 7px;
+      height: 18px;
+      border-radius: 0 9px 9px 0;
+      background: linear-gradient(90deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.5) 100%);
+      box-shadow: inset -1px 0 3px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.08);
       pointer-events: none;
     }
 
-    /* Right chamber notch */
+    /* Right chamber notch — fully inset */
     .picker-item::after {
       content: "";
       position: absolute;
-      right: -1px;
+      right: 2px;
       top: 50%;
       transform: translateY(-50%);
-      width: 10px;
-      height: 22px;
-      border-radius: 11px 0 0 11px;   /* left half-capsule */
-      background:
-        linear-gradient(270deg, rgba(0,0,0,.0) 0%, rgba(0,0,0,.55) 100%);
-      box-shadow: inset 2px 0 4px rgba(0,0,0,.5);
+      width: 7px;
+      height: 18px;
+      border-radius: 9px 0 0 9px;
+      background: linear-gradient(270deg, rgba(0,0,0,.15) 0%, rgba(0,0,0,.5) 100%);
+      box-shadow: inset 1px 0 3px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.08);
       pointer-events: none;
     }
 
