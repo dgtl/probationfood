@@ -154,9 +154,9 @@
       justify-content: center;
       gap: 10px;
       flex-wrap: nowrap;
-      overflow-x: auto;
+      overflow-x: visible;
       overflow-y: hidden;
-      padding: 8px 4px;
+      padding: 8px 16px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
@@ -187,7 +187,7 @@
         inset 0 -3px 10px rgba(0,0,0,.5),
         0 6px 20px rgba(0,0,0,.55),
         0 2px 4px rgba(0,0,0,.4);
-      overflow: hidden;
+      overflow: visible;
       touch-action: pan-y;
       overscroll-behavior: contain;
       user-select: none;
@@ -335,6 +335,7 @@
       width: 100%;
       will-change: transform;
       z-index: 1;
+      clip-path: inset(0 0 0 0 round 36px);
     }
 
     button {
@@ -387,6 +388,8 @@
       .picker-wrap {
         gap: 7px;
         justify-content: center;
+        overflow-x: visible;
+        padding: 8px 12px;
       }
 
       .picker-wheel {
