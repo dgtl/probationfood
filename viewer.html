@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Order Viewer</title>
+  <title>Sgt Dear is Treatin'</title>
 
   <style>
     * { box-sizing: border-box; }
@@ -154,7 +154,7 @@
 <body>
 
 <div class="wrap">
-  <h1>Live Order Viewer</h1>
+  <h1>Sgt Dear completed probation &amp; he's treatin' 🎉<br><span style="font-size:22px;color:#333;">Look who's eatin' - get your order in!</span></h1>
   <div class="meta" id="updated">Loading...</div>
 
   <div class="toolbar">
@@ -187,11 +187,9 @@
     <table>
       <thead>
         <tr>
-          <th>Time</th>
           <th>Name</th>
           <th>Meal</th>
           <th>Main Choice</th>
-          <th>Extra Taco</th>
         </tr>
       </thead>
       <tbody id="ordersTable"></tbody>
@@ -233,22 +231,32 @@
 
       document.getElementById("totalOrders").textContent = data.totals.totalOrders || 0;
 
-      renderSection("burritos", [
-        { label: "Beef & Red Chile Burrito", count: data.totals.burritos["Beef & Red Chile Burrito"] || 0 },
-        { label: "Beef & Green Chile Burrito", count: data.totals.burritos["Beef & Green Chile Burrito"] || 0 },
-        { label: "Chicken & Green Chile Burrito", count: data.totals.burritos["Chicken & Green Chile Burrito"] || 0 },
-        { label: "Chile Relleno Burrito", count: data.totals.burritos["Chile Relleno Burrito"] || 0 }
-      ]);
+      const burritoKeys = [
+        "Beef & Red Chile",
+        "Beef & Green Chile",
+        "Shredded Beef & Potato",
+        "Ground Beef & Potato",
+        "Chicken & Green Chile",
+        "Chorizo & Beans",
+        "Chile Relleno",
+        "Bean & Cheese",
+        "Picadillo"
+      ];
+      renderSection("burritos", burritoKeys.map(k => ({
+        label: k,
+        count: (data.totals.burritos && data.totals.burritos[k]) || 0
+      })));
 
-      renderSection("tacos3", [
-        { label: "Picadillo Taco", count: data.totals.tacos3["Picadillo Taco"] || 0 },
-        { label: "Chicken & Green Chile", count: data.totals.tacos3["Chicken & Green Chile"] || 0 }
-      ]);
+      const tacoKeys = ["Ground Beef & Potato", "Chicken & Green Chile"];
+      renderSection("tacos3", tacoKeys.map(k => ({
+        label: k,
+        count: (data.totals.tacos3 && data.totals.tacos3[k]) || 0
+      })));
 
-      renderSection("extraTacos", [
-        { label: "Picadillo Taco", count: data.totals.extraTacos["Picadillo Taco"] || 0 },
-        { label: "Chicken & Green Chile", count: data.totals.extraTacos["Chicken & Green Chile"] || 0 }
-      ]);
+      renderSection("extraTacos", tacoKeys.map(k => ({
+        label: k,
+        count: (data.totals.extraTacos && data.totals.extraTacos[k]) || 0
+      })));
 
       const tbody = document.getElementById("ordersTable");
       const orders = data.orders || [];
@@ -258,15 +266,16 @@
         return;
       }
 
-      tbody.innerHTML = orders.map(order => `
+      tbody.innerHTML = orders.map(order => {
+        const mainChoice = order.burritoChoice || order.tacoPlateType || "";
+        const extraTaco = order.extraTacoType ? ` <span style="color:#888;font-size:12px;">+${order.extraTacoType}</span>` : "";
+        return `
         <tr>
-          <td>${formatTime(order.timestamp)}</td>
           <td>${order.memberName || ""}</td>
           <td>${order.mealType || ""}</td>
-          <td>${order.burritoChoice || order.tacoPlateType || ""}</td>
-          <td>${order.extraTacoType || ""}</td>
-        </tr>
-      `).join("");
+          <td>${mainChoice}${extraTaco}</td>
+        </tr>`;
+      }).join("");
     };
 
     const oldScript = document.getElementById("jsonpOrders");
