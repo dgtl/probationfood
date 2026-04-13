@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ramona's Meal Order Form<br>Monday, April 20th</title>
+  <title>Ramona's Meal Order Form</title>
 
   <style>
     * {
@@ -148,14 +148,15 @@
       line-height: 1;
     }
 
+    /* ── Revolver cylinder picker ── */
     .picker-wrap {
       display: flex;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       flex-wrap: nowrap;
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 4px 0;
+      padding: 8px 4px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
@@ -165,17 +166,27 @@
     }
 
     .picker-wheel {
-      flex: 0 0 64px;
-      width: 64px;
+      flex: 0 0 72px;
+      width: 72px;
       height: 180px;
       position: relative;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #f8f8f8, #d7d7d7);
-      border: 1px solid #aaa;
+      border-radius: 36px;            /* full pill shape = cylinder end-on */
+      background:
+        linear-gradient(160deg,
+          #6a6a6a 0%,
+          #3a3a3a 30%,
+          #232323 55%,
+          #3e3e3e 75%,
+          #5a5a5a 100%
+        );
+      border: 2px solid #1a1a1a;
       box-shadow:
-        inset 0 2px 6px rgba(255,255,255,.85),
-        inset 0 -2px 6px rgba(0,0,0,.12),
-        0 4px 12px rgba(0,0,0,.18);
+        inset 2px 0 8px rgba(255,255,255,.10),
+        inset -2px 0 6px rgba(0,0,0,.45),
+        inset 0 3px 10px rgba(255,255,255,.07),
+        inset 0 -3px 10px rgba(0,0,0,.5),
+        0 6px 20px rgba(0,0,0,.55),
+        0 2px 4px rgba(0,0,0,.4);
       overflow: hidden;
       touch-action: pan-y;
       overscroll-behavior: contain;
@@ -196,63 +207,125 @@
       100% { transform: translateX(0); }
     }
 
+    /* Top/bottom fade — dark steel fade */
     .picker-wheel::before,
     .picker-wheel::after {
       content: "";
       position: absolute;
       left: 0;
       width: 100%;
-      height: 42px;
+      height: 52px;
       z-index: 5;
       pointer-events: none;
     }
 
     .picker-wheel::before {
       top: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,0));
+      background: linear-gradient(180deg, rgba(30,30,30,.95), rgba(30,30,30,0));
     }
 
     .picker-wheel::after {
       bottom: 0;
-      background: linear-gradient(0deg, rgba(255,255,255,.96), rgba(255,255,255,0));
+      background: linear-gradient(0deg, rgba(30,30,30,.95), rgba(30,30,30,0));
     }
 
+    /* The selected-row highlight — glowing chamber window */
     .picker-highlight {
       position: absolute;
-      left: 0;
+      left: 6px;
+      right: 6px;
       top: 68px;
-      width: 100%;
       height: 44px;
       z-index: 6;
       pointer-events: none;
-      background: rgba(255,255,255,.55);
-      border-top: 3px solid #8b1e14;
-      border-bottom: 3px solid #8b1e14;
+      border-radius: 22px;            /* half-capsule chamber shape */
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.18) 0%, rgba(0,0,0,.35) 100%);
+      border: 1.5px solid rgba(255,255,255,.18);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.9),
-        inset 0 -1px 0 rgba(255,255,255,.9),
-        0 0 0 1px rgba(90,22,15,.08);
-      transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+        inset 0 2px 6px rgba(0,0,0,.6),
+        inset 0 -1px 3px rgba(255,255,255,.08),
+        0 0 0 2px rgba(90,22,15,.55),
+        0 2px 8px rgba(0,0,0,.5);
+      transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
     }
 
     .picker-highlight.valid {
-      border-top-color: #1f8b3d;
-      border-bottom-color: #1f8b3d;
+      border-color: rgba(31,200,80,.55);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.9),
-        inset 0 -1px 0 rgba(255,255,255,.9),
-        0 0 0 1px rgba(31,139,61,.20);
-      background: rgba(31,139,61,.10);
+        inset 0 2px 6px rgba(0,0,0,.5),
+        0 0 0 2px rgba(31,139,61,.6),
+        0 0 12px rgba(31,200,80,.3);
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(31,200,80,.22) 0%, rgba(0,0,0,.3) 100%);
     }
 
     .picker-highlight.invalid {
-      border-top-color: #b00020;
-      border-bottom-color: #b00020;
+      border-color: rgba(220,30,30,.55);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.9),
-        inset 0 -1px 0 rgba(255,255,255,.9),
-        0 0 0 1px rgba(176,0,32,.18);
-      background: rgba(176,0,32,.08);
+        inset 0 2px 6px rgba(0,0,0,.5),
+        0 0 0 2px rgba(176,0,32,.6),
+        0 0 12px rgba(220,30,30,.3);
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(220,30,30,.22) 0%, rgba(0,0,0,.3) 100%);
+    }
+
+    /* Chamber notch marks — half-capsule indentations on both sides of each row */
+    .picker-item {
+      height: 44px;
+      line-height: 44px;
+      text-align: center;
+      font-size: 32px;
+      font-weight: 800;
+      color: #7a7a7a;
+      opacity: .3;
+      font-variant-numeric: tabular-nums;
+      transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
+      position: relative;
+    }
+
+    /* Left chamber notch */
+    .picker-item::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 22px;
+      border-radius: 0 11px 11px 0;   /* right half-capsule */
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.0) 0%, rgba(0,0,0,.55) 100%);
+      box-shadow: inset -2px 0 4px rgba(0,0,0,.5);
+      pointer-events: none;
+    }
+
+    /* Right chamber notch */
+    .picker-item::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 22px;
+      border-radius: 11px 0 0 11px;   /* left half-capsule */
+      background:
+        linear-gradient(270deg, rgba(0,0,0,.0) 0%, rgba(0,0,0,.55) 100%);
+      box-shadow: inset 2px 0 4px rgba(0,0,0,.5);
+      pointer-events: none;
+    }
+
+    .picker-item.near {
+      color: #aaa;
+      opacity: .55;
+    }
+
+    .picker-item.selected {
+      color: #f0f0f0;
+      opacity: 1;
+      transform: scale(1.1);
+      text-shadow: 0 0 8px rgba(255,255,255,.4), 0 1px 3px rgba(0,0,0,.8);
     }
 
     .picker-list {
@@ -262,29 +335,6 @@
       width: 100%;
       will-change: transform;
       z-index: 1;
-    }
-
-    .picker-item {
-      height: 44px;
-      line-height: 44px;
-      text-align: center;
-      font-size: 34px;
-      font-weight: 800;
-      color: #9a9a9a;
-      opacity: .35;
-      font-variant-numeric: tabular-nums;
-      transition: color 120ms ease, opacity 120ms ease, transform 120ms ease;
-    }
-
-    .picker-item.near {
-      color: #555;
-      opacity: .65;
-    }
-
-    .picker-item.selected {
-      color: #000;
-      opacity: 1;
-      transform: scale(1.15);
     }
 
     button {
@@ -335,27 +385,35 @@
       }
 
       .picker-wrap {
-        gap: 6px;
-        justify-content: flex-start;
+        gap: 7px;
+        justify-content: center;
       }
 
       .picker-wheel {
-        flex: 0 0 52px;
-        width: 52px;
+        flex: 0 0 56px;
+        width: 56px;
         height: 156px;
+        border-radius: 28px;
       }
 
       .picker-highlight {
+        left: 5px;
+        right: 5px;
         top: 58px;
         height: 40px;
-        border-top: 2px solid rgba(90,22,15,.65);
-        border-bottom: 2px solid rgba(90,22,15,.65);
+        border-radius: 20px;
       }
 
       .picker-item {
         height: 40px;
         line-height: 40px;
         font-size: 26px;
+      }
+
+      .picker-item::before,
+      .picker-item::after {
+        height: 18px;
+        width: 8px;
       }
     }
   </style>
@@ -364,7 +422,7 @@
 
 <div class="container">
   <h1>Ramona's Meal Order Form</h1>
-  <p class="intro">Tell Sgt Dear your food order below.</p>
+  <p class="intro">Sgt Dear is getting you Ramona's on <strong>Monday, April 20th</strong> — he passed probation! 🎉<br>Tell him what you want!</p>
 
   <form id="mealForm">
     <div class="field">
@@ -814,6 +872,8 @@
     document.body.appendChild(script);
   }
 
+  let lastNamesKey = null; // fingerprint of last loaded names list
+
   function loadNames() {
     window.nameCallback = function(data) {
       const select = document.getElementById("memberName");
@@ -821,28 +881,37 @@
 
       if (!data || !data.ok) {
         setStatus("Name load failed: " + ((data && data.error) || "Unknown error"), "red");
-        select.innerHTML = '<option value="">Unable to load names</option>';
         return;
       }
 
-      select.innerHTML = '<option value="">Select Name</option>';
+      const names = data.names || [];
 
-      data.names.forEach(name => {
+      // Build a fingerprint — only touch the DOM if the list actually changed
+      const newKey = names.join("|");
+      if (newKey === lastNamesKey) return; // nothing changed, skip the rebuild
+      lastNamesKey = newKey;
+
+      // Rebuild the select quietly
+      const frag = document.createDocumentFragment();
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = names.length ? "Select Name" : "No names found";
+      frag.appendChild(placeholder);
+
+      names.forEach(name => {
         const option = document.createElement("option");
         option.value = name;
         option.textContent = name;
-        select.appendChild(option);
+        frag.appendChild(option);
       });
 
+      select.replaceChildren(frag);
+
+      // Restore previous selection if still valid
       let preserved = false;
-      if (previousValue && data.names.includes(previousValue)) {
+      if (previousValue && names.includes(previousValue)) {
         select.value = previousValue;
         preserved = true;
-      }
-
-      if (!data.names.length) {
-        select.innerHTML = '<option value="">No names found</option>';
-        preserved = false;
       }
 
       if (!preserved && previousValue) {
@@ -865,8 +934,6 @@
     script.src = API + "?action=getNames&callback=nameCallback&_=" + Date.now();
     script.onerror = function() {
       setStatus("Name load failed: unable to reach Apps Script endpoint.", "red");
-      document.getElementById("memberName").innerHTML =
-        '<option value="">Unable to load names</option>';
     };
 
     document.body.appendChild(script);
