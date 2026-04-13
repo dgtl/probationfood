@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sgt Dear is Treatin'on Monday, 4-20.</title>
+  <title>Sgt Dear is Treatin'</title>
 
   <style>
     * { box-sizing: border-box; }
@@ -154,7 +154,7 @@
 <body>
 
 <div class="wrap">
-  <h1>Sgt Dear completed probation &amp; he's treatin' 🎉 on Monday April 20th<br><span style="font-size:22px;color:#333;">Look who's eatin' - get your order in!</span></h1>
+  <h1>Sgt Dear completed probation &amp; he's treatin' 🎉<br><span style="font-size:22px;color:#333;">Look who's eatin' — get your order in!</span></h1>
   <div class="meta" id="updated">Loading...</div>
 
   <div class="toolbar">
@@ -231,32 +231,23 @@
 
       document.getElementById("totalOrders").textContent = data.totals.totalOrders || 0;
 
-      const burritoKeys = [
-        "Beef & Red Chile",
-        "Beef & Green Chile",
-        "Shredded Beef & Potato",
-        "Ground Beef & Potato",
-        "Chicken & Green Chile",
-        "Chorizo & Beans",
-        "Chile Relleno",
-        "Bean & Cheese",
-        "Picadillo"
-      ];
-      renderSection("burritos", burritoKeys.map(k => ({
-        label: k,
-        count: (data.totals.burritos && data.totals.burritos[k]) || 0
-      })));
+      // Render whatever keys the API actually returns — no hardcoding
+      function tallyFromObject(obj) {
+        if (!obj) return [];
+        return Object.entries(obj)
+          .filter(([, count]) => count > 0)
+          .sort((a, b) => b[1] - a[1])
+          .map(([label, count]) => ({ label, count }));
+      }
 
-      const tacoKeys = ["Ground Beef & Potato", "Chicken & Green Chile"];
-      renderSection("tacos3", tacoKeys.map(k => ({
-        label: k,
-        count: (data.totals.tacos3 && data.totals.tacos3[k]) || 0
-      })));
+      const burritoItems = tallyFromObject(data.totals.burritos);
+      renderSection("burritos", burritoItems.length ? burritoItems : [{ label: "No orders yet", count: "" }]);
 
-      renderSection("extraTacos", tacoKeys.map(k => ({
-        label: k,
-        count: (data.totals.extraTacos && data.totals.extraTacos[k]) || 0
-      })));
+      const tacoItems = tallyFromObject(data.totals.tacos3);
+      renderSection("tacos3", tacoItems.length ? tacoItems : [{ label: "No orders yet", count: "" }]);
+
+      const extraItems = tallyFromObject(data.totals.extraTacos);
+      renderSection("extraTacos", extraItems.length ? extraItems : [{ label: "No orders yet", count: "" }]);
 
       const tbody = document.getElementById("ordersTable");
       const orders = data.orders || [];
