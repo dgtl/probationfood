@@ -428,13 +428,17 @@
 
     <div id="burritoSection" class="hidden">
       <div class="field">
-        <label class="main">Burrito Choices</label>
+        <label class="main">Burrito Choice</label>
         <div class="radio-group">
-          <label class="item"><input type="radio" name="burritoChoices" value="Beef & Red Chile">Beef & Red Chile</label>
-          <label class="item"><input type="radio" name="burritoChoices" value="Beef & Green Chile">Beef & Green Chile</label>
-          <label class="item"><input type="radio" name="burritoChoices" value="Chicken & Green Chile">Chicken & Green Chile</label>
-          <label class="item"><input type="radio" name="burritoChoices" value="Chile Relleno">Chile Relleno</label>
-          <label class="item"><input type="radio" name="burritoChoices" value="Rice & Bean only">Rice & Bean only</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Beef & Red Chile">Beef & Red Chile <span style="color:#888;font-size:13px;">— rice, beans, red chile beef</span></label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Beef & Green Chile">Beef & Green Chile <span style="color:#888;font-size:13px;">— rice, beans, green chile beef</span></label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Shredded Beef & Potato">Shredded Beef & Potato</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Ground Beef & Potato">Ground Beef & Potato <span style="color:#888;font-size:13px;">— lettuce, tomato, cheese, red salsa</span></label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Chicken & Green Chile">Chicken & Green Chile</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Chorizo & Beans">Chorizo & Beans</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Chile Relleno">Chile Relleno with Cheese</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Bean & Cheese">Bean & Cheese</label>
+          <label class="item"><input type="radio" name="burritoChoice" value="Picadillo">Picadillo</label>
         </div>
       </div>
 
@@ -442,9 +446,14 @@
         <label class="main">Add-ons</label>
         <div class="checkbox-group">
           <label class="item"><input type="checkbox" id="addRice">Rice</label>
+          <label class="item"><input type="checkbox" id="addBeans">Beans</label>
           <label class="item"><input type="checkbox" id="addCheese">Cheese</label>
-          <label class="item"><input type="checkbox" id="addGreenOnion">Green Onion</label>
           <label class="item"><input type="checkbox" id="addLettuce">Lettuce</label>
+          <label class="item"><input type="checkbox" id="addTomato">Tomato</label>
+          <label class="item"><input type="checkbox" id="addGreenOnion">Green Onion</label>
+          <label class="item"><input type="checkbox" id="addSourCream">Sour Cream</label>
+          <label class="item"><input type="checkbox" id="addGuacamole">Guacamole Sauce</label>
+          <label class="item"><input type="checkbox" id="addHotSauce">Hot Sauce</label>
         </div>
       </div>
 
@@ -459,7 +468,7 @@
         <div class="field">
           <label class="main">Extra Taco Type</label>
           <div class="radio-group">
-            <label class="item"><input type="radio" name="extraTacoType" value="Picadillo Taco">Picadillo Taco</label>
+            <label class="item"><input type="radio" name="extraTacoType" value="Ground Beef & Potato">Ground Beef & Potato <span style="color:#888;font-size:13px;">— lettuce, tomato, cheese</span></label>
             <label class="item"><input type="radio" name="extraTacoType" value="Chicken & Green Chile">Chicken & Green Chile</label>
           </div>
         </div>
@@ -477,16 +486,18 @@
       <div class="field">
         <label class="main">3 Taco Order Type</label>
         <div class="radio-group">
-          <label class="item"><input type="radio" name="tacoPlateType" value="Picadillo Taco">Picadillo Taco</label>
+          <label class="item"><input type="radio" name="tacoPlateType" value="Ground Beef & Potato">Ground Beef & Potato <span style="color:#888;font-size:13px;">— lettuce, tomato, cheese</span></label>
           <label class="item"><input type="radio" name="tacoPlateType" value="Chicken & Green Chile">Chicken & Green Chile</label>
         </div>
       </div>
 
       <div class="field">
-        <label class="item">
-          <input type="checkbox" id="tacoPlateHotSauce">
-          Add Hot Sauce
-        </label>
+        <label class="main">Taco Add-ons</label>
+        <div class="checkbox-group">
+          <label class="item"><input type="checkbox" id="tacoAddCheese">Extra Cheese</label>
+          <label class="item"><input type="checkbox" id="tacoAddGuacamole">Guacamole Sauce</label>
+          <label class="item"><input type="checkbox" id="tacoPlateHotSauce">Hot Sauce</label>
+        </div>
       </div>
     </div>
 
@@ -878,10 +889,9 @@
     if (type === "3 Tacos") {
       tacoSection.classList.remove("hidden");
       clearRadioGroup("burritoChoice");
-      document.getElementById("addRice").checked = false;
-      document.getElementById("addCheese").checked = false;
-      document.getElementById("addGreenOnion").checked = false;
-      document.getElementById("addLettuce").checked = false;
+      ["addRice","addBeans","addCheese","addLettuce","addTomato","addGreenOnion","addSourCream","addGuacamole","addHotSauce"].forEach(id => {
+        const el = document.getElementById(id); if (el) el.checked = false;
+      });
       document.getElementById("extraTaco").checked = false;
       document.getElementById("extraTacoSection").classList.add("hidden");
       clearRadioGroup("extraTacoType");
@@ -970,20 +980,31 @@
       return;
     }
 
+    // Collect burrito add-ons
+    const burritoAddons = [];
+    ["addRice","addBeans","addCheese","addLettuce","addTomato","addGreenOnion","addSourCream","addGuacamole","addHotSauce"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.checked) burritoAddons.push(el.closest("label").textContent.trim());
+    });
+
+    // Collect taco plate add-ons
+    const tacoAddons = [];
+    ["tacoAddCheese","tacoAddGuacamole","tacoPlateHotSauce"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.checked) tacoAddons.push(el.closest("label").textContent.trim());
+    });
+
     const data = {
       memberName: memberName,
       serialNumber: serialNumber,
       mealType: mealType,
       burritoChoice: burritoChoice,
-      addRice: document.getElementById("addRice").checked,
-      addCheese: document.getElementById("addCheese").checked,
-      addGreenOnion: document.getElementById("addGreenOnion").checked,
-      addLettuce: document.getElementById("addLettuce").checked,
+      burritoAddons: burritoAddons.join(", "),
       extraTaco: extraTaco,
       extraTacoType: extraTacoType,
       extraTacoHotSauce: document.getElementById("extraTacoHotSauce").checked,
       tacoPlateType: tacoPlateType,
-      tacoPlateHotSauce: document.getElementById("tacoPlateHotSauce").checked
+      tacoAddons: tacoAddons.join(", ")
     };
 
     try {
